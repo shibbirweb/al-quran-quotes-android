@@ -11,15 +11,24 @@ import shibbir.me.alquranquotes.data.local.AyahDao
 import shibbir.me.alquranquotes.data.local.QuranDatabase
 import javax.inject.Singleton
 
+/** File name of the app database; tests use it to delete the database between runs. */
+internal const val QURAN_DATABASE_NAME = "quran.db"
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideQuranDatabase(@ApplicationContext context: Context): QuranDatabase =
-        Room.databaseBuilder(context, QuranDatabase::class.java, "quran.db").build()
+    fun provideQuranDatabase(@ApplicationContext applicationContext: Context): QuranDatabase {
+        val databaseBuilder = Room.databaseBuilder(
+            applicationContext,
+            QuranDatabase::class.java,
+            QURAN_DATABASE_NAME,
+        )
+        return databaseBuilder.build()
+    }
 
     @Provides
-    fun provideAyahDao(database: QuranDatabase): AyahDao = database.ayahDao()
+    fun provideAyahDao(quranDatabase: QuranDatabase): AyahDao = quranDatabase.ayahDao()
 }

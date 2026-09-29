@@ -1,77 +1,41 @@
 package shibbir.me.alquranquotes.data.repository
 
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import shibbir.me.alquranquotes.model.Ayah
+import shibbir.me.alquranquotes.data.seed.AyahSeed
 import shibbir.me.alquranquotes.testing.FakeAyahDao
 import shibbir.me.alquranquotes.testing.FakeAyahSeedSource
-import shibbir.me.alquranquotes.testing.testAyahEntity
+import shibbir.me.alquranquotes.testing.testAyah
 
+/** Which ayah [OfflineAyahRepository] returns for a day. */
 class OfflineAyahRepositoryTest {
 
-    private val seedAyahs = listOf(
-        testAyahEntity(surah = 94, ayah = 5),
-        testAyahEntity(surah = 2, ayah = 153),
-        testAyahEntity(surah = 13, ayah = 28),
-    )
-
     @Test
-    fun seedsDatabaseOnFirstRequest() = runTest {
-        val ayahDao = FakeAyahDao()
-        val repository = repository(ayahDao, FakeAyahSeedSource(seedAyahs))
+    fun returnsNullWhenSeedHasNoAyahs() = runTest {
+        val emptyAyahSeed = AyahSeed(version = 1, ayahs = emptyList())
+        val ayahSeedSource = FakeAyahSeedSource(emptyAyahSeed)
+        val repository = createOfflineAyahRepository(FakeAyahDao(), ayahSeedSource)
 
-        repository.getDailyAyah(epochDay = 0L)
+        val dailyAyah = repository.getDailyAyah(epochDay = 0L)
 
-        assertEquals(3, ayahDao.count())
-    }
-
-    @Test
-    fun doesNotSeedAgainWhenDatabaseHasAyahs() = runTest {
-        val seedSource = FakeAyahSeedSource(seedAyahs)
-        val repository = repository(FakeAyahDao(), seedSource)
-
-        repository.getDailyAyah(epochDay = 0L)
-        repository.getDailyAyah(epochDay = 1L)
-
-        assertEquals(1, seedSource.loadCount)
+        assertNull(dailyAyah)
     }
 
     @Test
     fun picksAyahForDayInSurahAndAyahOrder() = runTest {
-        val repository = repository(FakeAyahDao(), FakeAyahSeedSource(seedAyahs))
+        val ayahSeedSource = FakeAyahSeedSource(SampleAyahSeeds.firstAyahSeed)
+        val repository = createOfflineAyahRepository(FakeAyahDao(), ayahSeedSource)
 
-        assertEquals(ayah(2, 153), repository.getDailyAyah(epochDay = 0L))
-        assertEquals(ayah(13, 28), repository.getDailyAyah(epochDay = 1L))
-        assertEquals(ayah(94, 5), repository.getDailyAyah(epochDay = 2L))
-        assertEquals(ayah(2, 153), repository.getDailyAyah(epochDay = 3L))
+        val dayZeroAyah = repository.getDailyAyah(epochDay = 0L)
+        val dayOneAyah = repository.getDailyAyah(epochDay = 1L)
+        val dayTwoAyah = repository.getDailyAyah(epochDay = 2L)
+        val dayThreeAyah = repository.getDailyAyah(epochDay = 3L)
+
+        assertEquals(testAyah(surahNumber = 2, ayahNumber = 153), dayZeroAyah)
+        assertEquals(testAyah(surahNumber = 13, ayahNumber = 28), dayOneAyah)
+        assertEquals(testAyah(surahNumber = 94, ayahNumber = 5), dayTwoAyah)
+        assertEquals(testAyah(surahNumber = 2, ayahNumber = 153), dayThreeAyah)
     }
-
-    @Test
-    fun returnsNullWhenNoAyahsAreAvailable() = runTest {
-        val repository = repository(FakeAyahDao(), FakeAyahSeedSource(emptyList()))
-
-        assertNull(repository.getDailyAyah(epochDay = 0L))
-    }
-
-    private fun TestScope.repository(
-        ayahDao: FakeAyahDao,
-        seedSource: FakeAyahSeedSource,
-    ) = OfflineAyahRepository(
-        ayahDao = ayahDao,
-        seedSource = seedSource,
-        ioDispatcher = StandardTestDispatcher(testScheduler),
-    )
-
-    private fun ayah(surah: Int, ayah: Int) = Ayah(
-        surahNumber = surah,
-        ayahNumber = ayah,
-        surahNameEnglish = "Surah $surah",
-        surahNameArabic = "surah-ar-$surah",
-        arabicText = "arabic-$surah-$ayah",
-        translation = "translation-$surah-$ayah",
-    )
 }

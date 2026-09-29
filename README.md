@@ -10,13 +10,13 @@ This section is the feature tracker. Update it in the same branch as the work (s
 
 | Feature | Notes |
 | --- | --- |
-| Project foundation | Jetpack Compose + Material 3 app, GitHub Actions CI that runs unit and instrumented tests on every pull request and on `main`. |
+| Project foundation | Jetpack Compose + Material 3 app, GitHub Actions CI that runs unit tests with a 100% coverage check (Kover), lint, the R8 release build, and instrumented tests on every pull request and on `main`. |
 
 ### In progress
 
 | Feature | Branch | Notes |
 | --- | --- | --- |
-| Daily quote screen | `feature/daily-quote-screen` | Shows one ayah per day (Arabic, English translation, reference), picked from a bundled set of 33 ayahs stored in Room. Works offline. Includes the MVVM, Hilt, and Room foundation the later features build on. |
+| Daily quote screen | `feature/daily-quote-screen` | Shows one ayah per day (Arabic, English translation, reference), picked from a bundled set of 33 ayahs stored in Room. Works offline, moves to the new ayah after midnight, and updates to the bundled ayahs reach installed apps. Includes the MVVM, Hilt, and Room foundation the later features build on. |
 
 ### Planned
 
@@ -32,7 +32,7 @@ This section is the feature tracker. Update it in the same branch as the work (s
 
 ## Tech stack
 
-Kotlin, Jetpack Compose (Material 3), MVVM, Kotlin Coroutines and Flow, Hilt, Room, DataStore (with Settings). Tests use JUnit 4, kotlinx-coroutines-test, and Compose UI tests, written test first (TDD).
+Kotlin, Jetpack Compose (Material 3), MVVM, Kotlin Coroutines and Flow, Hilt, Room. DataStore will be added with Settings. Tests use JUnit 4, kotlinx-coroutines-test, and Compose UI tests, written test first (TDD), with Kover measuring coverage.
 
 ## Build and test
 
@@ -41,6 +41,10 @@ Requires Android Studio (or the Android SDK) and a JDK. Gradle provisions the JD
 ```bash
 ./gradlew assembleDebug               # build the debug APK
 ./gradlew testDebugUnitTest           # unit tests
+./gradlew koverVerifyDebug            # unit tests + fail below 100% line and branch coverage
+./gradlew koverHtmlReportDebug        # coverage report in app/build/reports/kover/htmlDebug/
+./gradlew lintDebug                   # Android lint
+./gradlew assembleRelease             # release build with R8
 ./gradlew connectedDebugAndroidTest   # instrumented tests, needs a device or emulator
 ```
 

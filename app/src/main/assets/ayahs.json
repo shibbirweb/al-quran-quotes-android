@@ -1,6 +1,7 @@
 {
   "source": "Arabic text: Tanzil Project (quran-simple), https://tanzil.net. English translation: Saheeh International. Retrieved via https://alquran.cloud.",
   "translationLanguage": "en",
+  "version": 1,
   "ayahs": [
     {
       "surah": 2,

@@ -1,8 +1,8 @@
 package shibbir.me.alquranquotes.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -12,47 +12,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = DarkPrimary,
+    secondary = DarkSecondary,
+    tertiary = DarkTertiary,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = LightPrimary,
+    secondary = LightSecondary,
+    tertiary = LightTertiary,
 )
 
+/**
+ * App theme. Uses Material You dynamic color on Android 12+ when [useDynamicColor] is true.
+ * Otherwise it uses the static light and dark schemes defined above, which are built from the
+ * brand colors in Color.kt.
+ */
 @Composable
 fun AlQuranQuotesTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useDynamicColor: Boolean = true,
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+    val colorScheme = selectColorScheme(
+        useDarkTheme = useDarkTheme,
+        useDynamicColor = useDynamicColor,
+    )
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        typography = AppTypography,
+        content = content,
     )
+}
+
+@Composable
+private fun selectColorScheme(useDarkTheme: Boolean, useDynamicColor: Boolean): ColorScheme {
+    if (useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val context = LocalContext.current
+        if (useDarkTheme) {
+            return dynamicDarkColorScheme(context)
+        }
+        return dynamicLightColorScheme(context)
+    }
+    if (useDarkTheme) {
+        return DarkColorScheme
+    }
+    return LightColorScheme
 }

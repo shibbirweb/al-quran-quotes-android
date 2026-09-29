@@ -6,71 +6,87 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import shibbir.me.alquranquotes.data.local.AyahEntity
-import java.io.File
+import shibbir.me.alquranquotes.testing.ashSharhSampleAyah
+import shibbir.me.alquranquotes.testing.readBundledAyahSeedJson
 
 class AyahJsonParserTest {
 
-    @Test
-    fun parsesAyahFields() {
-        val json = """
+    /** Holds exactly the fields of [ashSharhSampleAyah]. */
+    private val singleAyahSeedJson = """
+        {
+          "version": 3,
+          "ayahs": [
             {
-              "ayahs": [
-                {
-                  "surah": 94,
-                  "ayah": 5,
-                  "surahNameEnglish": "Ash-Sharh",
-                  "surahNameArabic": "sharh-ar",
-                  "arabic": "arabic-text",
-                  "translation": "For indeed, with hardship [will be] ease."
-                }
-              ]
+              "surah": 94,
+              "ayah": 5,
+              "surahNameEnglish": "Ash-Sharh",
+              "surahNameArabic": "surah-name-arabic",
+              "arabic": "arabic-text",
+              "translation": "translation-text"
             }
-        """.trimIndent()
+          ]
+        }
+    """.trimIndent()
 
-        val ayahs = parseAyahsJson(json)
+    @Test
+    fun parsesAyahFieldsAndVersion() {
+        val ayahSeed = parseAyahSeedJson(singleAyahSeedJson)
 
-        assertEquals(
-            listOf(
-                AyahEntity(
-                    surah = 94,
-                    ayah = 5,
-                    surahNameEnglish = "Ash-Sharh",
-                    surahNameArabic = "sharh-ar",
-                    arabic = "arabic-text",
-                    translation = "For indeed, with hardship [will be] ease.",
-                ),
-            ),
-            ayahs,
-        )
+        val expectedAyahSeed = AyahSeed(version = 3, ayahs = listOf(ashSharhSampleAyah()))
+        assertEquals(expectedAyahSeed, ayahSeed)
     }
 
     @Test
     fun emptyAyahListParsesToEmptyList() {
-        assertTrue(parseAyahsJson("""{ "ayahs": [] }""").isEmpty())
+        val ayahSeed = parseAyahSeedJson("""{ "version": 1, "ayahs": [] }""")
+
+        assertTrue(ayahSeed.ayahs.isEmpty())
     }
 
     @Test
-    fun missingFieldFails() {
-        val json = """{ "ayahs": [ { "surah": 1 } ] }"""
+    fun missingAyahFieldThrowsJsonException() {
+        val ayahSeedJson = """{ "version": 1, "ayahs": [ { "surah": 1 } ] }"""
 
         assertThrows(JSONException::class.java) {
-            parseAyahsJson(json)
+            parseAyahSeedJson(ayahSeedJson)
+        }
+    }
+
+    @Test
+    fun wrongAyahFieldTypeThrowsJsonException() {
+        val ayahSeedJson = singleAyahSeedJson.replace("\"surah\": 94", "\"surah\": \"x\"")
+
+        assertThrows(JSONException::class.java) {
+            parseAyahSeedJson(ayahSeedJson)
+        }
+    }
+
+    @Test
+    fun missingVersionThrowsJsonException() {
+        val ayahSeedJson = """{ "ayahs": [] }"""
+
+        assertThrows(JSONException::class.java) {
+            parseAyahSeedJson(ayahSeedJson)
         }
     }
 
     @Test
     fun bundledAssetIsValid() {
-        val ayahs = parseAyahsJson(File("src/main/assets/$AYAHS_ASSET_NAME").readText())
+        val bundledAyahSeedJson = readBundledAyahSeedJson()
 
+        val ayahSeed = parseAyahSeedJson(bundledAyahSeedJson)
+
+        val ayahs = ayahSeed.ayahs
+        val uniqueAyahKeys = ayahs.map { it.surahNumber to it.ayahNumber }.toSet()
         assertTrue(ayahs.isNotEmpty())
-        assertEquals(ayahs.size, ayahs.map { it.surah to it.ayah }.toSet().size)
+        assertTrue(ayahSeed.version >= 1)
+        assertEquals(ayahs.size, uniqueAyahKeys.size)
         ayahs.forEach { ayah ->
-            assertTrue(ayah.surah in 1..114)
-            assertTrue(ayah.ayah >= 1)
+            assertTrue(ayah.surahNumber in 1..114)
+            assertTrue(ayah.ayahNumber >= 1)
             assertFalse(ayah.surahNameEnglish.isBlank())
             assertFalse(ayah.surahNameArabic.isBlank())
-            assertFalse(ayah.arabic.isBlank())
+            assertFalse(ayah.arabicText.isBlank())
             assertFalse(ayah.translation.isBlank())
         }
     }
