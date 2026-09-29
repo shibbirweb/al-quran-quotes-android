@@ -123,21 +123,22 @@ private fun DailyQuoteError(onRetry: () -> Unit) {
     }
 }
 
+/** Sample ayah for Compose previews only. */
+internal val PreviewAyah = Ayah(
+    surahNumber = 94,
+    ayahNumber = 5,
+    surahNameEnglish = "Ash-Sharh",
+    surahNameArabic = "سُورَةُ الشَّرۡحِ",
+    arabicText = "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
+    translation = "For indeed, with hardship [will be] ease.",
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun DailyQuoteScreenSuccessPreview() {
     AlQuranQuotesTheme {
         DailyQuoteScreen(
-            uiState = DailyQuoteUiState.Success(
-                Ayah(
-                    surahNumber = 94,
-                    ayahNumber = 5,
-                    surahNameEnglish = "Ash-Sharh",
-                    surahNameArabic = "سورة الشرح",
-                    arabicText = "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
-                    translation = "For indeed, with hardship [will be] ease.",
-                ),
-            ),
+            uiState = DailyQuoteUiState.Success(PreviewAyah),
             onRetry = {},
         )
     }
