@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Al Quran Quotes</string>
+    <string name="daily_quote_title">Ayah of the day</string>
+    <string name="daily_quote_loading">Loading today\'s ayah</string>
+    <string name="daily_quote_error">Could not load today\'s ayah.</string>
+    <string name="daily_quote_retry">Retry</string>
+    <!-- Surah name, surah number, ayah number, e.g. "Ash-Sharh 94:5" -->
+    <string name="ayah_reference">%1$s %2$d:%3$d</string>
 </resources>
