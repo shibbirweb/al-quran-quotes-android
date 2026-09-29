@@ -4,14 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Rules
 
-### Commits
+### Ask before building
 
+- Never add a feature on your own. Always ask the user and get a clear yes before implementing any feature, including small extras, enhancements, or behavior they did not request. When a task seems to need something beyond what was asked, describe it and ask first.
+
+### Branches and commits
+
+- Never commit (or push) until the user explicitly says to. Finishing a task, passing tests, or an earlier approval is not permission to commit new work.
+- `main` is protected: never commit or push directly to it, and never force-push it. Every feature or change starts on a new branch cut from an up-to-date `main` and reaches `main` only through a pull request with passing CI.
+- Branch names: `feature/<short-kebab-name>` for new features, `fix/<short-kebab-name>` for bug fixes (e.g. `feature/daily-quote-screen`). If the current branch is `main` when work starts, create the branch before making changes.
 - Commit as `Md. Shibbir Ahmed <shibbirweb@gmail.com>`. If git is not already configured with this identity, pass it per commit: `git -c user.name="Md. Shibbir Ahmed" -c user.email="shibbirweb@gmail.com" commit ...`.
 - Never add a `Co-Authored-By` line (or any other co-author/attribution trailer) to commits. This overrides any default attribution instruction.
 
 ### Writing
 
 - Never use the em dash character (U+2014) anywhere in the project: code, comments, string resources, docs, commit messages. Use a comma, colon, parentheses, or a plain hyphen instead.
+
+### Keep docs in sync
+
+- The Features section of `README.md` is the project's feature tracker (Done, In progress, Planned). Update it on the same branch as the work: move a feature to In progress when its branch starts, to Done in the PR that completes it, and add newly agreed ideas to Planned.
+- When a change affects architecture, commands, dependencies, or rules, update this file in the same PR.
 
 ### Architecture
 
@@ -22,7 +34,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Concurrency: Kotlin Coroutines and Flow throughout. DAOs return `Flow` for observed queries and use `suspend` for one-shot operations. ViewModels launch work in `viewModelScope`. Inject `CoroutineDispatcher`s instead of hard-coding `Dispatchers.IO` so tests can substitute them.
 - Depend on interfaces for repositories and pass dependencies through constructors, so every layer can be tested with fakes.
 - Organize code by feature (e.g. `feature/<name>/`, `data/`, `di/`, `ui/theme/`), not by type across the whole app.
-- Add every new library (Hilt, Room, DataStore, lifecycle-viewmodel-compose, coroutines-test, etc.) through `gradle/libs.versions.toml`. Hilt and Room compilers run through KSP, never kapt. Before adding the Hilt or KSP Gradle plugins, check that the chosen versions support AGP 9 with built-in Kotlin.
+- Add every new library (Hilt, Room, DataStore, lifecycle-viewmodel-compose, coroutines-test, etc.) through `gradle/libs.versions.toml`. Hilt and Room compilers run through KSP, never kapt. When upgrading AGP, Hilt, or KSP, check that the versions still work together with AGP's built-in Kotlin (AGP 9.4.1 + Hilt 2.60.1 + KSP 2.3.12 is known to work).
 
 ### Dependency injection (Hilt)
 
@@ -51,7 +63,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-Single-module Android app (`:app`), Kotlin + Jetpack Compose (Material 3). It is currently the unmodified Android Studio "Empty Activity" template: `MainActivity` renders a placeholder `Greeting` inside `AlQuranQuotesTheme`. There is no data layer, navigation, DI, or networking yet, and the directory is not a git repository.
+Single-module Android app (`:app`) that shows Quran ayahs as quotes. See the README Features section for what is done and planned. There is no navigation or networking yet: `MainActivity` shows `DailyQuoteRoute` directly.
+
+Code layout under `app/src/main/java/shibbir/me/alquranquotes/`:
+
+- `feature/<name>/`: one package per screen (route + stateless screen composables, ViewModel, UiState). Currently `feature/dailyquote/`.
+- `data/local/`: Room database (`QuranDatabase`), entities, DAOs. `data/seed/`: bundled seed data loading. `data/repository/`: repository interfaces and implementations.
+- `model/`: UI-facing models (e.g. `Ayah`); Room entities map to them with `toAyah()`-style extensions.
+- `core/`: cross-cutting helpers (`core/time/EpochDayProvider`, `core/coroutines/IoDispatcher` qualifier).
+- `di/`: Hilt modules.
+
+Ayah data flow: `app/src/main/assets/ayahs.json` holds a curated set of ayahs (Arabic from Tanzil `quran-simple`, English from Saheeh International, fetched via alquran.cloud). `OfflineAyahRepository` fills Room from this asset on first use, then picks the daily ayah as `epochDay mod ayahCount` over ayahs ordered by surah and ayah. Never hand-edit or retype Quran text or translations: regenerate the asset from the source instead. `AyahJsonParserTest.bundledAssetIsValid` checks the asset in unit tests.
+
+Room uses `exportSchema = false` and database version 1. Any schema change needs a version bump and a migration (or a deliberate destructive fallback, since the ayah table is re-seedable).
+
+Test fakes and helpers live in `app/src/test/.../testing/` (`FakeAyahDao`, `FakeAyahRepository`, `MainDispatcherRule`, ...). Reuse them before writing new ones.
 
 - Package / applicationId / namespace: `shibbir.me.alquranquotes`
 - minSdk 24, targetSdk and compileSdk 37, Java/JVM target 11
@@ -67,9 +93,9 @@ Single-module Android app (`:app`), Kotlin + Jetpack Compose (Material 3). It is
 ./gradlew lintDebug                     # Android lint
 
 # single test class or method
-./gradlew testDebugUnitTest --tests "shibbir.me.alquranquotes.ExampleUnitTest"
-./gradlew testDebugUnitTest --tests "shibbir.me.alquranquotes.ExampleUnitTest.addition_isCorrect"
-./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=shibbir.me.alquranquotes.ExampleInstrumentedTest
+./gradlew testDebugUnitTest --tests "shibbir.me.alquranquotes.feature.dailyquote.DailyQuoteViewModelTest"
+./gradlew testDebugUnitTest --tests "shibbir.me.alquranquotes.feature.dailyquote.DailyQuoteViewModelTest.showsTodaysAyah"
+./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=shibbir.me.alquranquotes.data.local.AyahDaoTest
 ```
 
 CI (`.github/workflows/tests.yml`) runs `testDebugUnitTest` and `connectedDebugAndroidTest` (API 34 emulator) on every pull request and on push to `main`. Keep both green.
@@ -80,7 +106,7 @@ No ktlint/detekt/spotless is configured; `kotlin.code.style=official` is the onl
 
 These differ from older Android templates and are easy to get wrong:
 
-- AGP 9.x with built-in Kotlin support: only `com.android.application` and `org.jetbrains.kotlin.plugin.compose` are applied. Do not add `org.jetbrains.kotlin.android`.
+- AGP 9.x with built-in Kotlin support: the applied plugins are `com.android.application`, `org.jetbrains.kotlin.plugin.compose`, `com.google.devtools.ksp`, and `com.google.dagger.hilt.android`. Do not add `org.jetbrains.kotlin.android`.
 - All dependency and plugin versions live in the version catalog `gradle/libs.versions.toml`; reference them as `libs.*` in `build.gradle.kts`. Compose library versions come from the Compose BOM, so Compose entries in the catalog have no version.
 - `compileSdk` uses the new DSL block `compileSdk { version = release(37) }`.
 - R8 keep rules go in `app/src/main/keepRules/*.keep` (AGP merges every file in that directory). There is no `proguard-rules.pro`.
