@@ -75,6 +75,6 @@ Uninstalling is not a way around a schema change. The database holds user data, 
 
 - **Sync fails while downloading the JDK:** check your network or proxy, then sync again. Gradle needs to reach `api.foojay.io` the first time.
 - **The app crashes with "Room cannot verify the data integrity":** a database from an old pre-release build is on the device. Clear the app's storage once (see above). Uninstalling may not be enough: the phone can restore the old database from a backup, or the uninstall can reach another profile such as a Secure Folder instead.
-- **Instrumented tests fail with `NoSuchMethodError`:** a test library is newer than the copy the app uses at runtime. Keep test libraries on the same version as the library they test.
+- **Instrumented tests fail with `NoSuchMethodError` or `AbstractMethodError`:** a test library, or something it brings along, is newer than the copy the app uses at runtime. Keep test libraries on the same version as the library they test. For example, `room-testing` 2.8.5 brings `kotlinx-serialization-json` 1.8.1, so `kotlinxSerialization` in `gradle/libs.versions.toml` is 1.8.1; at 1.7.3 `QuranDatabaseMigrationTest` failed with `AbstractMethodError`. `./gradlew :app:dependencies --configuration debugAndroidTestRuntimeClasspath` shows the versions the device tests get.
 
 [Back to the Developer Guide](Developer-Guide.md)
