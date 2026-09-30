@@ -13,6 +13,30 @@ Never add a feature on your own. This includes small extras, "while I am here" i
 - Name branches `feature/<short-kebab-name>` for new features and `fix/<short-kebab-name>` for bug fixes, for example `feature/daily-quote-screen`.
 - A change reaches `main` only through a pull request with passing CI. See [CI and Release](Developer-CI-And-Release.md).
 
+This flowchart shows the path of a change from a new branch to `main` and the wiki.
+
+```mermaid
+flowchart TD
+    Agree["agree the change with the project owner"]
+    Branch["cut feature/name or fix/name from an up-to-date main"]
+    Work["tests first, code, docs, tracker"]
+    Commit["commit and push when told to"]
+    PullRequest["open a pull request"]
+    Checks{"Tests workflow green?"}
+    Fix["fix and push again"]
+    Review["review"]
+    Merge["merge into main"]
+    MainRun["Tests workflow runs on main"]
+    Wiki["wiki.yml publishes docs/ if it changed"]
+    Agree --> Branch --> Work --> Commit --> PullRequest --> Checks
+    Checks -->|"no"| Fix
+    Fix --> Checks
+    Checks -->|"yes"| Review
+    Review --> Merge
+    Merge --> MainRun
+    Merge --> Wiki
+```
+
 ```bash
 git switch main
 git pull

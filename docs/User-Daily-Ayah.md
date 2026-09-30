@@ -22,9 +22,28 @@ If the ayah is long, or your text is large, you can scroll down to read all of i
 - If you travel and your phone moves to a new time zone, the app uses your new local day.
 - After all 33 ayahs have been shown, the set starts again from the beginning.
 
+This picture shows how the ayah changes from day to day.
+
+```mermaid
+flowchart LR
+    Today["Today: one ayah, all day"] -->|"Midnight, your local time"| Tomorrow["Tomorrow: the next ayah"]
+    Tomorrow -->|"Every midnight"| AllShown["All 33 ayahs have been shown"]
+    AllShown -->|"Next midnight"| StartAgain["The set starts again from the beginning"]
+```
+
 ## While it loads
 
 For a short moment you may see a small spinning circle. This means the app is getting today's ayah ready. It is usually very fast.
+
+This picture shows what you see when you open the app.
+
+```mermaid
+flowchart TD
+    OpenApp["You open the app"] --> Loading["A small spinning circle, for a moment"]
+    Loading -->|"Ready"| AyahShown["You see the ayah of the day"]
+    Loading -->|"Rare problem"| ErrorMessage["A message: Could not load today's ayah, with a Retry button"]
+    ErrorMessage -->|"You tap Retry"| Loading
+```
 
 ## If it says "Could not load today's ayah."
 

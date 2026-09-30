@@ -8,6 +8,32 @@ GitHub Actions checks every change before it can reach `main`. This page explain
 
 Both jobs start the same way: check out the code, install JDK 25 (Temurin), and set up Gradle with caching.
 
+This flowchart shows the steps of both jobs. The summary and coverage upload steps run on every run, and the raw report uploads run only when the job fails.
+
+```mermaid
+flowchart TD
+    Trigger["pull request, or push to main"]
+    subgraph Unit["Job: Unit tests"]
+        UnitSetup["checkout, JDK 25, setup-gradle"]
+        UnitGradle["testDebugUnitTest, koverVerifyDebug, Kover reports, lintDebug, assembleRelease"]
+        UnitSummary["coverage_summary.py writes the Kover table"]
+        UnitArtifact["upload unit-test-coverage"]
+        UnitFailure["on failure: upload unit-test-reports"]
+    end
+    subgraph Device["Job: Instrumented tests"]
+        DeviceSetup["checkout, JDK 25, setup-gradle, enable KVM"]
+        Snapshot["restore or create the API 35 emulator snapshot"]
+        DeviceGradle["createDebugCoverageReport on the emulator"]
+        DeviceSummary["coverage_summary.py writes the JaCoCo table"]
+        DeviceArtifact["upload device-test-coverage"]
+        DeviceFailure["on failure: upload instrumented-test-reports"]
+    end
+    Trigger --> UnitSetup
+    Trigger --> DeviceSetup
+    UnitSetup --> UnitGradle --> UnitSummary --> UnitArtifact --> UnitFailure
+    DeviceSetup --> Snapshot --> DeviceGradle --> DeviceSummary --> DeviceArtifact --> DeviceFailure
+```
+
 ### Job 1: Unit tests
 
 One Gradle call runs all the JVM checks:
@@ -60,6 +86,23 @@ A newer push to a pull request cancels the older, still running run for that pul
 `.github/workflows/wiki.yml` publishes the `docs/` folder to the GitHub wiki. It runs on every push to `main` that changes `docs/` (or the workflow file itself), and it can also be started by hand.
 
 It checks out the wiki's git repository, copies `docs/` over it (pages removed from `docs/` are removed from the wiki too), and strips `.md` from page links. That is why pages link to each other as `Page-Name.md` in the repository: the links work on GitHub and, after stripping, in the wiki.
+
+This flowchart shows the steps of the wiki workflow.
+
+```mermaid
+flowchart TD
+    Trigger["push to main that changes docs or wiki.yml, or a manual run"]
+    Checkout["check out the repository"]
+    WikiCheckout["check out the wiki repository into wiki/"]
+    Copy["rsync docs/ into wiki/ with --delete"]
+    Links["strip .md from page links"]
+    Changed{"anything changed?"}
+    Push["commit and push the wiki"]
+    Done["stop: the wiki is already up to date"]
+    Trigger --> Checkout --> WikiCheckout --> Copy --> Links --> Changed
+    Changed -->|"yes"| Push
+    Changed -->|"no"| Done
+```
 
 Rules that follow from this:
 

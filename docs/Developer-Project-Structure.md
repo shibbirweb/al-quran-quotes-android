@@ -31,6 +31,32 @@ Code is organized **by feature**, not by type. A screen keeps its route, screen,
 
 A new screen gets its own package, for example `feature/favorites/`.
 
+This map shows the packages, their main files, and which package uses which. `di` wires the classes together and is left out to keep the map readable.
+
+```mermaid
+flowchart TD
+    Root["root: AlQuranQuotesApp, MainActivity"]
+    Feature["feature/dailyquote: DailyQuoteScreen.kt, DailyQuoteViewModel, DailyQuoteUiState"]
+    Theme["ui/theme: Theme.kt, Color.kt, AppTypography.kt"]
+    Repository["data/repository: AyahRepository, OfflineAyahRepository"]
+    Local["data/local: QuranDatabase, AyahDao, AyahEntity, AyahSeedInfoEntity, DailyAyahPosition.kt"]
+    Seed["data/seed: AyahSeedSource, AssetAyahSeedSource, AyahSeed, AyahJsonParser.kt"]
+    Time["core/time: EpochDayProvider, EpochDay.kt, DayChangeSource and their System versions"]
+    Coroutines["core/coroutines: IoDispatcher"]
+    Model["model: Ayah"]
+    Root --> Feature
+    Root --> Theme
+    Feature --> Repository
+    Feature --> Time
+    Feature --> Model
+    Repository --> Local
+    Repository --> Seed
+    Repository --> Model
+    Local --> Model
+    Seed --> Model
+    Seed --> Coroutines
+```
+
 ## Other main resources
 
 - `app/src/main/assets/ayahs.json`: the bundled ayahs. See [Ayah Data](Developer-Ayah-Data.md).
@@ -44,6 +70,23 @@ A new screen gets its own package, for example `feature/favorites/`.
 | `app/src/main` | The app | Production code and resources. |
 | `app/src/test` | The JVM on your computer | Fast unit tests for ViewModels, repositories, parsers, and pure functions. |
 | `app/src/androidTest` | A device or emulator | Room DAO tests, Compose UI tests, and anything that needs the Android framework. |
+
+This diagram shows how the two test source sets relate to `app/src/main` and where their helpers live.
+
+```mermaid
+flowchart LR
+    Main["app/src/main: production code"]
+    Assets["app/src/main/assets/ayahs.json"]
+    UnitTests["app/src/test: JVM unit tests"]
+    UnitHelpers["app/src/test/.../testing: fakes and TestData.kt"]
+    DeviceTests["app/src/androidTest: device tests"]
+    DeviceHelpers["app/src/androidTest/.../testing and feature/dailyquote fakes"]
+    UnitTests -->|"tests"| Main
+    DeviceTests -->|"tests"| Main
+    Assets -->|"test resource"| UnitTests
+    UnitHelpers --> UnitTests
+    DeviceHelpers --> DeviceTests
+```
 
 One detail is easy to miss: `src/main/assets` is also a test resources directory (see the `sourceSets` block in `app/build.gradle.kts`). That lets unit tests read the real `ayahs.json` from the classpath.
 

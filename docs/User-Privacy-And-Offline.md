@@ -8,6 +8,16 @@ We want you to feel safe using this app.
 - The app never uses the internet. It does not even ask Android for internet access.
 - It works on a plane, in places with no signal, and with mobile data turned off.
 
+This picture shows that everything stays on your phone.
+
+```mermaid
+flowchart LR
+    Install["You install the app"] --> Inside["The 33 ayahs come inside the app"]
+    Inside --> Phone["The app keeps them on your phone"]
+    Phone --> Read["You read the ayah of the day"]
+    Phone --> NothingSent["Nothing is sent anywhere"]
+```
+
 ## No permissions
 
 The app asks for **no permissions**. It cannot see your contacts, photos, location, camera, microphone, or files.

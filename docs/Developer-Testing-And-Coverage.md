@@ -72,6 +72,33 @@ Some code cannot run on the plain JVM, or is not ours to test. The full, authori
 
 `@Preview` composables are development tools that never ship, so they need no tests.
 
+This diagram shows which tests exercise which code, and which report measures it. Kover only counts the unit tests, over the code it does not exclude. The device tests cover the excluded code, and JaCoCo reports on it.
+
+```mermaid
+flowchart LR
+    subgraph JvmCode["Measured by Kover"]
+        ViewModel["DailyQuoteViewModel"]
+        Repository["OfflineAyahRepository"]
+        DaoLogic["AyahDao.getAyahForDay and replaceAllAyahs, via FakeAyahDao"]
+        Pure["epochDayOf, dailyAyahPosition, parseAyahSeedJson"]
+    end
+    subgraph AndroidCode["Excluded from Kover"]
+        Composables["Composable functions"]
+        AppClasses["MainActivity, AlQuranQuotesApp, QuranDatabase"]
+        SystemClasses["AssetAyahSeedSource, SystemDayChangeSource, ui.theme"]
+    end
+    UnitTests["app/src/test unit tests"]
+    DeviceTests["app/src/androidTest device tests"]
+    Kover["Kover: koverVerifyDebug, 100% enforced"]
+    Jacoco["JaCoCo: createDebugCoverageReport, reported only"]
+    UnitTests --> JvmCode
+    DeviceTests --> AndroidCode
+    UnitTests --> Kover
+    DeviceTests --> Jacoco
+```
+
+The device tests also run some JVM code, for example `AyahDaoTest` runs the real Room DAO, and that shows up in the JaCoCo report too.
+
 **Never add an exclusion just to reach 100%.** Make the code testable instead (inject the dependency, remove an impossible branch) or write the missing test. A new Android-bound class may be excluded only if an instrumented test covers it, and the exclusion must be listed in `CLAUDE.md` in the same pull request.
 
 ## Device test coverage with JaCoCo

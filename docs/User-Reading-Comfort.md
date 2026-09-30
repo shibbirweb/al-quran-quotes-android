@@ -13,6 +13,17 @@ The app follows your phone's settings, so it can be comfortable for your eyes an
 - **Android 12 and newer:** the app's colors follow your wallpaper (this is called Material You). So the app can look different on two phones.
 - **Android 11 and older:** the app uses its own fixed colors.
 
+This picture shows which colors you get.
+
+```mermaid
+flowchart TD
+    Phone["Your phone"] --> Version{"Android 12 or newer?"}
+    Version -->|"Yes"| Wallpaper["Colors from your wallpaper"]
+    Version -->|"No"| AppColors["The app's own colors"]
+    Wallpaper --> Mode["Dark or light follows your phone's setting"]
+    AppColors --> Mode
+```
+
 ## Large text
 
 - The app follows your phone's **font size** setting.

@@ -6,6 +6,8 @@ Why this shape? Each layer depends only on interfaces below it, and every depend
 
 ## The layers
 
+This diagram shows the layers and which class depends on which.
+
 ```mermaid
 flowchart TD
     subgraph UI["UI layer (Jetpack Compose)"]
@@ -70,6 +72,42 @@ All modules live in `app/src/main/java/shibbir/me/alquranquotes/di/` and are ins
 | `TimeModule` | `@Binds` `EpochDayProvider` to `SystemEpochDayProvider`, and `DayChangeSource` to `SystemDayChangeSource`. |
 
 The rule of thumb: bind interfaces with `@Binds`, and use `@Provides` for Room, DataStore, and dispatchers.
+
+This graph shows what each module provides or binds (solid arrows) and where Hilt injects each object (dotted arrows).
+
+```mermaid
+flowchart LR
+    subgraph Modules["di modules in SingletonComponent"]
+        DatabaseModule["DatabaseModule"]
+        DispatchersModule["DispatchersModule"]
+        DataModule["DataModule"]
+        TimeModule["TimeModule"]
+    end
+    Database["QuranDatabase (singleton, quran.db)"]
+    Dao["AyahDao"]
+    IoDispatcher["IoDispatcher CoroutineDispatcher"]
+    SeedSource["AyahSeedSource as AssetAyahSeedSource"]
+    Repository["AyahRepository as OfflineAyahRepository (singleton)"]
+    DayProvider["EpochDayProvider as SystemEpochDayProvider"]
+    DayChanges["DayChangeSource as SystemDayChangeSource"]
+    ViewModel["DailyQuoteViewModel"]
+    DatabaseModule -->|"provides"| Database
+    DatabaseModule -->|"provides"| Dao
+    DispatchersModule -->|"provides"| IoDispatcher
+    DataModule -->|"binds"| SeedSource
+    DataModule -->|"binds"| Repository
+    TimeModule -->|"binds"| DayProvider
+    TimeModule -->|"binds"| DayChanges
+    Database -.-> Dao
+    IoDispatcher -.-> SeedSource
+    Dao -.-> Repository
+    SeedSource -.-> Repository
+    Repository -.-> ViewModel
+    DayProvider -.-> ViewModel
+    DayChanges -.-> ViewModel
+```
+
+`AssetAyahSeedSource` and `SystemDayChangeSource` also receive the `@ApplicationContext`, which Hilt supplies itself.
 
 ## From asset to screen
 

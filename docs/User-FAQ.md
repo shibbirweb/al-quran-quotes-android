@@ -12,6 +12,15 @@ At midnight, in your local time. If the app is open at midnight, the screen chan
 
 The app follows the time zone of your phone. When your phone changes to the new time zone, the app uses your new local day. So you may get the next ayah a little earlier or later than at home.
 
+This picture shows what happens when you travel, or when you change the date on your phone.
+
+```mermaid
+flowchart TD
+    Change["You travel to a new time zone, or change the phone's date"] --> NewDay["Your phone now shows a different day"]
+    NewDay --> AppFollows["The app follows your phone's day"]
+    AppFollows --> AyahForDay["You see the ayah for that day"]
+```
+
 ## Can I go back to yesterday's ayah or skip ahead?
 
 Not at the moment. The app shows only today's ayah.
