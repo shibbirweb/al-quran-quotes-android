@@ -37,6 +37,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - The Features section of `README.md` is the project's feature tracker (Done, In progress, Planned). Update it on the same branch as the work: move a feature to In progress when its branch starts, to Done in the PR that completes it, and add newly agreed ideas to Planned.
 - When a change affects architecture, commands, dependencies, or rules, update this file in the same PR.
+- `docs/` holds the project wiki, published to the GitHub wiki by `.github/workflows/wiki.yml` on every push to `main`. Never edit the wiki directly; edit `docs/`. It has two guides:
+  - User Guide (`docs/User-*.md`): for people using the app. Plain, simple language, no technical terms, no code.
+  - Developer Guide (`docs/Developer-*.md`): for people working on the app. Simple language, real file and class names, commands that work.
+- Every PR that adds a feature or fixes a bug updates the affected docs pages in the same PR: user pages for anything a user can see or do differently, developer pages for changes to architecture, data, commands, tests, coverage, CI, or rules. A PR that changes neither must say so in its description. Planned features stay listed in `User-Coming-Soon.md` until they ship.
+- Docs format: one `# Title` per page; link pages as `Page-Name.md` (the workflow strips `.md` for the wiki); refer to source files by repo path in backticks, not links; no images or HTML (Mermaid blocks are fine); short pages; no em dash. A new page must be linked from its guide page (`User-Guide.md` or `Developer-Guide.md`) and from `docs/_Sidebar.md`.
 
 ### Architecture
 
@@ -72,7 +77,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Room DAOs: instrumented tests in `app/src/androidTest` against an in-memory database.
   - Compose screens: UI tests with `createComposeRule()` against the stateless screen composable.
 - Prefer hand-written fakes over mocks.
-- Coverage: Kover requires 100% line and 100% branch coverage from the JVM unit tests (`./gradlew koverVerifyDebug`, also run in CI). The only exclusions, configured in the `kover` block of `app/build.gradle.kts`, are generated code (Hilt, Dagger, Room `_Impl`, Compose singletons) and Android-bound code that the instrumented tests cover instead: `@Composable` functions, `@dagger.Module` classes, `MainActivity`, `AlQuranQuotesApp`, `QuranDatabase`, `AssetAyahSeedSource`, `SystemDayChangeSource`, and `ui.theme` (each covered by a test in `app/src/androidTest`). `@Preview` composables are exempt: they are development tools that never ship to users. Never add an exclusion to reach 100%: make the code testable (inject the dependency, remove an impossible branch) or write the missing test. A new Android-bound class may be excluded only if an instrumented test covers it, and the exclusion must be listed here in the same PR.
+- Coverage: Kover requires 100% line and 100% branch coverage from the JVM unit tests (`./gradlew koverVerifyDebug`, also run in CI). The only exclusions, configured in the `kover` block of `app/build.gradle.kts`, are generated code (Hilt, Dagger, Room `_Impl`, Compose singletons) and Android-bound code that the instrumented tests cover instead: `@Composable` functions, `@dagger.Module` classes, `MainActivity`, `AlQuranQuotesApp`, `QuranDatabase`, `AssetAyahSeedSource`, `SystemDayChangeSource`, and `ui.theme` (each covered by a test in `app/src/androidTest`). `@Preview` composables are exempt: they are development tools that never ship to users. Never add an exclusion to reach 100%: make the code testable (inject the dependency, remove an impossible branch) or write the missing test. A new Android-bound class may be excluded only if an instrumented test covers it, and the exclusion must be listed here in the same PR. Device-test coverage of that excluded code is measured with AGP's JaCoCo (`enableAndroidTestCoverage` on the debug build type, `./gradlew createDebugCoverageReport`); it is reported in CI but not enforced yet. Aim to cover every excluded class and composable there as well.
 - Run the relevant test tasks (see Commands) and confirm they pass before calling a feature done.
 
 ## Project state
@@ -110,6 +115,8 @@ Test fakes and helpers live in `app/src/test/.../testing/` (`FakeAyahDao`, `Fake
 ./gradlew koverVerifyDebug              # unit tests + fail if coverage is below 100% line/branch
 ./gradlew koverHtmlReportDebug          # coverage report at app/build/reports/kover/htmlDebug/index.html
 ./gradlew assembleRelease               # release build with R8
+./gradlew createDebugCoverageReport     # instrumented tests + JaCoCo report, needs a device
+                                        # (app/build/reports/coverage/androidTest/debug/connected/)
 
 # single test class or method
 ./gradlew testDebugUnitTest --tests "shibbir.me.alquranquotes.feature.dailyquote.DailyQuoteViewModelTest"
@@ -117,7 +124,7 @@ Test fakes and helpers live in `app/src/test/.../testing/` (`FakeAyahDao`, `Fake
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=shibbir.me.alquranquotes.data.local.AyahDaoTest
 ```
 
-CI (`.github/workflows/tests.yml`) runs `testDebugUnitTest koverVerifyDebug lintDebug assembleRelease` and `connectedDebugAndroidTest` (API 35 emulator) on every pull request and on push to `main`. Keep all of them green. A newer push cancels an in-progress pull request run; an in-progress `main` run is never cancelled (though a queued `main` run can be replaced by a newer queued one).
+CI (`.github/workflows/tests.yml`) runs `testDebugUnitTest koverVerifyDebug koverXmlReportDebug koverHtmlReportDebug lintDebug assembleRelease` and `createDebugCoverageReport` (instrumented tests with JaCoCo on an API 35 emulator) on every pull request and on push to `main`. Keep all of them green. Both jobs write a coverage table to the run summary (`.github/scripts/coverage_summary.py`) and upload their coverage reports as artifacts on every run. A newer push cancels an in-progress pull request run; an in-progress `main` run is never cancelled (though a queued `main` run can be replaced by a newer queued one).
 
 No ktlint/detekt/spotless is configured; `kotlin.code.style=official` is the only style setting.
 
