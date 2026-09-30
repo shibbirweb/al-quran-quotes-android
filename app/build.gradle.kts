@@ -24,6 +24,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // JaCoCo coverage for the instrumented tests (createDebugAndroidTestCoverageReport).
+            enableAndroidTestCoverage = true
+        }
         release {
             optimization {
                 enable = true

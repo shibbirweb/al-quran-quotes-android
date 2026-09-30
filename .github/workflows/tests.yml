@@ -29,11 +29,22 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Run unit tests, coverage check, lint, and release build
-        run: ./gradlew --continue testDebugUnitTest koverVerifyDebug lintDebug assembleRelease
+        run: >-
+          ./gradlew --continue testDebugUnitTest koverVerifyDebug koverXmlReportDebug
+          koverHtmlReportDebug lintDebug assembleRelease
 
-      - name: Write the coverage report
-        if: failure()
-        run: ./gradlew koverHtmlReportDebug
+      - name: Summarize unit test coverage
+        if: always()
+        run: >-
+          python3 .github/scripts/coverage_summary.py "Unit test coverage (Kover)"
+          "app/build/reports/kover/reportDebug.xml"
+
+      - name: Upload unit test coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-coverage
+          path: app/build/reports/kover/
 
       - name: Upload unit test, coverage, and lint reports
         if: failure()
@@ -96,7 +107,20 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          script: ./gradlew createDebugCoverageReport
+
+      - name: Summarize device test coverage
+        if: always()
+        run: >-
+          python3 .github/scripts/coverage_summary.py "Device test coverage (JaCoCo)"
+          "app/build/reports/coverage/androidTest/debug/**/report.xml"
+
+      - name: Upload device test coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: device-test-coverage
+          path: app/build/reports/coverage/androidTest/
 
       - name: Upload instrumented test reports
         if: failure()

@@ -11,12 +11,13 @@ This section is the feature tracker. Update it in the same branch as the work (s
 | Feature | Notes |
 | --- | --- |
 | Project foundation | Jetpack Compose + Material 3 app, GitHub Actions CI that runs unit tests with a 100% coverage check (Kover), lint, the R8 release build, and instrumented tests on every pull request and on `main`. |
+| Daily quote screen | Shows one ayah per day (Arabic, English translation, reference), picked from a bundled set of 33 ayahs stored in Room. Works offline, moves to the new ayah after midnight (also while the screen stays open), and updates to the bundled ayahs reach installed apps. Includes the MVVM, Hilt, and Room foundation the later features build on. Merged in PR #1. |
 
 ### In progress
 
 | Feature | Branch | Notes |
 | --- | --- | --- |
-| Daily quote screen | `feature/daily-quote-screen` | Shows one ayah per day (Arabic, English translation, reference), picked from a bundled set of 33 ayahs stored in Room. Works offline, moves to the new ayah after midnight, and updates to the bundled ayahs reach installed apps. Includes the MVVM, Hilt, and Room foundation the later features build on. |
+| None | | |
 
 ### Planned
 
@@ -29,6 +30,10 @@ This section is the feature tracker. Update it in the same branch as the work (s
 | More translation languages | English stays the default; users can add the translation languages they want. |
 | Custom Arabic font | Users can upload their own font file for the Arabic text. |
 | Online ayah source | Fetch more ayahs and translations online, on top of the bundled offline set. |
+
+## Documentation
+
+The [User Guide](docs/User-Guide.md) and the [Developer Guide](docs/Developer-Guide.md) live in `docs/` and are published to the project's GitHub wiki.
 
 ## Tech stack
 
@@ -46,6 +51,7 @@ Requires Android Studio (or the Android SDK) and a JDK. Gradle provisions the JD
 ./gradlew lintDebug                   # Android lint
 ./gradlew assembleRelease             # release build with R8
 ./gradlew connectedDebugAndroidTest   # instrumented tests, needs a device or emulator
+./gradlew createDebugCoverageReport   # instrumented tests + device coverage report (JaCoCo)
 ```
 
 ## Contributing

@@ -1,0 +1,52 @@
+name: Publish wiki
+
+# docs/ is the single source for the GitHub wiki. The wiki must already have one page
+# (create any page once in the GitHub UI) so that its git repository exists.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - ".github/workflows/wiki.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish docs to the wiki
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check out the wiki
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Copy docs into the wiki
+        run: |
+          rsync --archive --delete --exclude .git docs/ wiki/
+          # Pages link to each other as Page-Name.md in the repo; the wiki expects Page-Name.
+          find wiki -name '*.md' -exec sed -i -E 's/\]\(([A-Za-z0-9_-]+)\.md(#[^)]*)?\)/](\1\2)/g' {} +
+
+      - name: Push the wiki
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          if git diff --cached --quiet; then
+            echo "The wiki is already up to date."
+            exit 0
+          fi
+          git commit --message "docs: publish wiki from ${GITHUB_SHA::7}"
+          git push
