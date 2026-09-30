@@ -33,6 +33,35 @@ The asset is copied into Room, and the app reads ayahs only from Room. The work 
 3. If the versions differ, or the `ayahs` table is empty, it calls `AyahDao.replaceAllAyahs`. That deletes every stored ayah, inserts the new ones, and records the new version, all in **one transaction**.
 4. It marks the check as done, so later calls skip it.
 
+This flowchart shows one `getDailyAyah` call, including what happens when the seed check fails.
+
+```mermaid
+flowchart TD
+    Call["getDailyAyah(epochDay)"]
+    Lock["ensureStoredSeedIsCurrent takes seedCheckMutex"]
+    Checked{"isSeedChecked?"}
+    Load["ayahSeedSource.load()"]
+    SameVersion{"getSeedVersion() equals the asset version?"}
+    HasAyahs{"countAyahs() is above zero?"}
+    Replace["replaceAllAyahs: delete, insert, record version in one transaction"]
+    Mark["isSeedChecked = true"]
+    Read["ayahDao.getAyahForDay(epochDay), then toAyah()"]
+    Failed["exception goes to the caller, isSeedChecked stays false, the next call retries"]
+    Call --> Lock
+    Lock --> Checked
+    Checked -->|"yes"| Read
+    Checked -->|"no"| Load
+    Load --> SameVersion
+    SameVersion -->|"no"| Replace
+    SameVersion -->|"yes"| HasAyahs
+    HasAyahs -->|"no"| Replace
+    HasAyahs -->|"yes"| Mark
+    Replace --> Mark
+    Mark --> Read
+    Load -->|"throws"| Failed
+    Replace -->|"throws and rolls back"| Failed
+```
+
 A few details and the reasons behind them:
 
 - **Once per process, guarded by a `Mutex`.** Two callers at the same time still load the asset only once.
