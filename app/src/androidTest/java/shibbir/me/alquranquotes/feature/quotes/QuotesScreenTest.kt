@@ -1,11 +1,12 @@
 package shibbir.me.alquranquotes.feature.quotes
 
 import android.content.Context
-import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -32,6 +33,14 @@ class QuotesScreenTest {
 
     private val addLabel = targetContext.getString(R.string.quotes_add)
 
+    /** Every sample card, in list order, with the kind label it must show. */
+    private val cardsWithTheirKindLabels = listOf(
+        deviceBundledAyahCard to R.string.quotes_kind_bundled_ayah,
+        deviceEditedAyahCard to R.string.quotes_kind_edited_bundled_ayah,
+        deviceUserAyahCard to R.string.quotes_kind_user_ayah,
+        deviceUserFreeTextCard to R.string.quotes_kind_user_free_text,
+    )
+
     @Test
     fun topAppBarShowsTheTitleAsAHeading() {
         composeTestRule.setQuotesScreen(QuotesUiState.Loading)
@@ -52,13 +61,8 @@ class QuotesScreenTest {
     fun everyCardShowsTheLabelOfItsKind() {
         composeTestRule.setQuotesScreen(loadedStateWithEveryKind())
 
-        val kindLabels = listOf(
-            R.string.quotes_kind_bundled_ayah,
-            R.string.quotes_kind_edited_bundled_ayah,
-            R.string.quotes_kind_user_ayah,
-            R.string.quotes_kind_user_free_text,
-        )
-        for (kindLabelResId in kindLabels) {
+        for ((quoteCard, kindLabelResId) in cardsWithTheirKindLabels) {
+            composeTestRule.scrollToQuoteCard(quoteCard)
             composeTestRule.onNodeWithText(targetContext.getString(kindLabelResId)).assertExists()
         }
     }
@@ -67,22 +71,28 @@ class QuotesScreenTest {
     fun cardsShowTheirPreviewAndReference() {
         composeTestRule.setQuotesScreen(loadedStateWithEveryKind())
 
+        composeTestRule.scrollToQuoteCard(deviceUserAyahCard)
         composeTestRule.onNodeWithText("user-arabic").assertExists()
         composeTestRule.onNodeWithText("user-translation").assertExists()
         composeTestRule.onNodeWithText("User Surah 2:7").assertExists()
+        composeTestRule.scrollToQuoteCard(deviceUserFreeTextCard)
         composeTestRule.onNodeWithText("user-free-text").assertExists()
         composeTestRule.onNodeWithText("user-reference").assertExists()
     }
 
+    /** The buttons and texts of a card are all direct children of the card's node. */
     @Test
     fun everyCardHasEditAndDeleteButtons() {
         composeTestRule.setQuotesScreen(loadedStateWithEveryKind())
 
-        val cardCount = deviceQuoteCards.size
-        val editButtons = composeTestRule.onAllNodesWithContentDescription(editDescription)
-        editButtons.assertCountEquals(cardCount)
-        val deleteButtons = composeTestRule.onAllNodesWithContentDescription(deleteDescription)
-        deleteButtons.assertCountEquals(cardCount)
+        for ((quoteCard, kindLabelResId) in cardsWithTheirKindLabels) {
+            composeTestRule.scrollToQuoteCard(quoteCard)
+            val inThisCard = hasParent(hasAnyChild(hasText(targetContext.getString(kindLabelResId))))
+            composeTestRule.onNode(hasContentDescription(editDescription) and inThisCard)
+                .assertExists()
+            composeTestRule.onNode(hasContentDescription(deleteDescription) and inThisCard)
+                .assertExists()
+        }
     }
 
     @Test

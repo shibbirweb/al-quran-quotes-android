@@ -98,6 +98,8 @@ You can also run any test from Android Studio with the green arrow next to it.
 
 **Device tests: compile locally, run in CI.** Without a device or emulator, at least compile the device tests with `./gradlew assembleDebugAndroidTest` so a broken test does not reach the pull request. CI runs every device test on an API 35 emulator (`createDebugCoverageReport -PdeviceTestCoverage`, see [CI and Release](Developer-CI-And-Release.md)). If you do have a device or emulator, run them locally too.
 
+**Lazy lists only build what fits on the screen.** The CI emulator's screen is smaller than most phones, so in a `LazyColumn` such as the Quotes list, a card further down does not exist in the test until it is scrolled into view, and `assertExists` or a node count fails there while it passes on a phone. Scroll to the item first: `QuotesScreenTest` calls `scrollToQuoteCard` (`performScrollToKey` with the quote id) before it checks each card. To find one card's button, match it through the card: `hasParent(hasAnyChild(hasText(...)))`, because a card's texts and buttons are all direct children of its node.
+
 ## Unit test coverage with Kover
 
 Kover measures JVM unit-test coverage. The rule lives in the `kover` block of `app/build.gradle.kts`.

@@ -146,7 +146,7 @@ Hand-written fakes are preferred over mocks. Reuse these before writing new ones
 
 - `testing/`: shared device helpers `DeviceTestData.kt` (`testBundledQuoteEntity`, `testUserAyahEntity`, `testUserFreeTextEntity`), `CreateInMemoryQuranDatabase.kt` (`createInMemoryQuranDatabase()`), and `ReceiverRecordingContext`.
 - `feature/dailyquote/`: `FakeDailyQuoteRepository`, `FakeEpochDayProvider`, `FakeDayChangeSource`, and `setDailyQuoteScreen`.
-- `feature/quotes/`: `DeviceQuoteCards.kt`, `RecordedQuotesScreenCallbacks`, and `setQuotesScreen`.
+- `feature/quotes/`: `DeviceQuoteCards.kt`, `RecordedQuotesScreenCallbacks`, `setQuotesScreen`, and `scrollToQuoteCard` (scrolls the lazy list to a card by its quote id).
 - `feature/quoteeditor/`: `DeviceFakeQuoteRepository`, `RecordedQuoteEditorCallbacks`, and `setQuoteEditorScreen`.
 
 The two test source sets cannot share code, so some small duplication between them is expected.
