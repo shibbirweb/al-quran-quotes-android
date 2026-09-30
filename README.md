@@ -17,7 +17,7 @@ This section is the feature tracker. Update it in the same branch as the work (s
 
 | Feature | Branch | Notes |
 | --- | --- | --- |
-| None | | |
+| Bottom navigation and my quotes | `feature/bottom-nav-and-quote-crud` | Native Material 3 design with a bottom navigation bar (Home, Quotes, Settings), large collapsing titles, and smooth 300 ms screen changes. The Quotes tab lists all quotes; every quote, bundled or your own, can be edited and deleted, and you can add an ayah (surah, ayah number, Arabic text, translation in any language) or free text in any language. App updates keep your edits and deletions. All quotes join the daily rotation on Home. Settings is a placeholder for now. |
 
 ### Planned
 
@@ -51,7 +51,7 @@ Requires Android Studio (or the Android SDK) and a JDK. Gradle provisions the JD
 ./gradlew lintDebug                   # Android lint
 ./gradlew assembleRelease             # release build with R8
 ./gradlew connectedDebugAndroidTest   # instrumented tests, needs a device or emulator
-./gradlew createDebugCoverageReport   # instrumented tests + device coverage report (JaCoCo)
+./gradlew createDebugCoverageReport -PdeviceTestCoverage   # instrumented tests + device coverage report (JaCoCo)
 ```
 
 ## Contributing

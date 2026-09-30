@@ -12,17 +12,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import shibbir.me.alquranquotes.core.time.DayChangeSource
 import shibbir.me.alquranquotes.core.time.EpochDayProvider
-import shibbir.me.alquranquotes.data.repository.AyahRepository
-import shibbir.me.alquranquotes.model.Ayah
+import shibbir.me.alquranquotes.data.repository.DailyQuoteRepository
+import shibbir.me.alquranquotes.model.Quote
 import javax.inject.Inject
 
 /**
- * Loads the ayah of the day and moves to the next day's ayah when the day changes, either on a
- * [DayChangeSource] event or when the screen resumes.
+ * Loads the quote of the day and moves to the next day's quote when the day changes, either on
+ * a [DayChangeSource] event or when the screen resumes.
  */
 @HiltViewModel
 class DailyQuoteViewModel @Inject constructor(
-    private val ayahRepository: AyahRepository,
+    private val dailyQuoteRepository: DailyQuoteRepository,
     private val epochDayProvider: EpochDayProvider,
     private val dayChangeSource: DayChangeSource,
 ) : ViewModel() {
@@ -40,7 +40,7 @@ class DailyQuoteViewModel @Inject constructor(
         refreshOnEveryDayChange()
     }
 
-    /** Loads today's ayah, for example when the user taps Retry. */
+    /** Loads today's quote, for example when the user taps Retry. */
     fun loadDailyQuote() {
         val today = epochDayProvider.today()
         startLoading(epochDay = today)
@@ -77,8 +77,8 @@ class DailyQuoteViewModel @Inject constructor(
 
     private suspend fun loadDailyQuoteState(epochDay: Long): DailyQuoteUiState {
         try {
-            val ayah = ayahRepository.getDailyAyah(epochDay)
-            return dailyQuoteStateFor(ayah)
+            val quote = dailyQuoteRepository.getDailyQuote(epochDay)
+            return dailyQuoteStateFor(quote)
         } catch (exception: Exception) {
             // A CancellationException can also come from inside the repository, for example from
             // a timeout. This rethrows only when this load itself was cancelled, so a cancelled
@@ -88,10 +88,10 @@ class DailyQuoteViewModel @Inject constructor(
         }
     }
 
-    private fun dailyQuoteStateFor(ayah: Ayah?): DailyQuoteUiState {
-        if (ayah == null) {
+    private fun dailyQuoteStateFor(quote: Quote?): DailyQuoteUiState {
+        if (quote == null) {
             return DailyQuoteUiState.Error
         }
-        return DailyQuoteUiState.Success(ayah)
+        return DailyQuoteUiState.Success(quote)
     }
 }

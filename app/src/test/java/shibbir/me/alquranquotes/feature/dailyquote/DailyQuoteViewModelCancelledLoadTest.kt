@@ -24,11 +24,11 @@ class DailyQuoteViewModelCancelledLoadTest {
 
     private val fixture = DailyQuoteViewModelTestFixture()
 
-    private val ayah = fixture.ayah
+    private val quote = fixture.quote
 
     @Test
     fun cancelledLoadDoesNotOverwriteTheNewerLoadsState() = runTest {
-        fixture.ayahRepository.dailyAyah = ayah
+        fixture.dailyQuoteRepository.dailyQuote = quote
         // Deliberately never completed: the older load stays suspended until it is cancelled.
         val olderResponseGate = fixture.holdRepositoryResponse()
         val viewModel = fixture.createViewModel()
@@ -43,7 +43,7 @@ class DailyQuoteViewModelCancelledLoadTest {
         newerResponseGate.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
         assertFalse(olderResponseGate.isCompleted)
     }
 }

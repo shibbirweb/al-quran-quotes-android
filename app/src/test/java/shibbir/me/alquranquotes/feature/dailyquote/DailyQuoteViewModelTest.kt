@@ -19,45 +19,66 @@ class DailyQuoteViewModelTest {
 
     private val fixture = DailyQuoteViewModelTestFixture()
 
-    private val ayahRepository = fixture.ayahRepository
+    private val dailyQuoteRepository = fixture.dailyQuoteRepository
 
     private val epochDayProvider = fixture.epochDayProvider
 
-    private val ayah = fixture.ayah
+    private val quote = fixture.quote
 
-    private val otherAyah = fixture.otherAyah
+    private val otherQuote = fixture.otherQuote
 
     @Test
-    fun showsLoadingWhileRepositoryIsSuspendedThenAyah() = runTest {
+    fun showsLoadingWhileRepositoryIsSuspendedThenQuote() = runTest {
         epochDayProvider.currentEpochDay = 100L
-        ayahRepository.dailyAyah = ayah
+        dailyQuoteRepository.dailyQuote = quote
         val responseGate = fixture.holdRepositoryResponse()
 
         val viewModel = fixture.createViewModel()
 
-        assertEquals(listOf(100L), ayahRepository.requestedEpochDays)
+        assertEquals(listOf(100L), dailyQuoteRepository.requestedEpochDays)
         assertEquals(DailyQuoteUiState.Loading, viewModel.uiState.value)
 
         responseGate.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
+    }
+
+    @Test
+    fun showsTheUsersAyahQuote() = runTest {
+        dailyQuoteRepository.dailyQuote = fixture.userAyahQuote
+
+        val viewModel = fixture.createViewModel()
+        advanceUntilIdle()
+
+        assertEquals(DailyQuoteUiState.Success(fixture.userAyahQuote), viewModel.uiState.value)
+    }
+
+    @Test
+    fun showsTheUsersFreeTextQuote() = runTest {
+        dailyQuoteRepository.dailyQuote = fixture.userFreeTextQuote
+
+        val viewModel = fixture.createViewModel()
+        advanceUntilIdle()
+
+        val expectedState = DailyQuoteUiState.Success(fixture.userFreeTextQuote)
+        assertEquals(expectedState, viewModel.uiState.value)
     }
 
     @Test
     fun requestsTheProvidersEpochDay() = runTest {
-        ayahRepository.dailyAyah = ayah
+        dailyQuoteRepository.dailyQuote = quote
         epochDayProvider.currentEpochDay = 20_000L
 
         fixture.createViewModel()
         advanceUntilIdle()
 
-        assertEquals(listOf(20_000L), ayahRepository.requestedEpochDays)
+        assertEquals(listOf(20_000L), dailyQuoteRepository.requestedEpochDays)
     }
 
     @Test
-    fun showsErrorWhenNoAyahIsAvailable() = runTest {
-        ayahRepository.dailyAyah = null
+    fun showsErrorWhenNoQuoteIsAvailable() = runTest {
+        dailyQuoteRepository.dailyQuote = null
 
         val viewModel = fixture.createViewModel()
         advanceUntilIdle()
@@ -67,7 +88,7 @@ class DailyQuoteViewModelTest {
 
     @Test
     fun showsErrorWhenLoadingFails() = runTest {
-        ayahRepository.failureToThrow = IOException("asset missing")
+        dailyQuoteRepository.failureToThrow = IOException("asset missing")
 
         val viewModel = fixture.createViewModel()
         advanceUntilIdle()
@@ -78,7 +99,7 @@ class DailyQuoteViewModelTest {
     @Test
     fun showsErrorWhenRepositoryThrowsCancellationWhileTheLoadIsStillActive() = runTest {
         // For example a timeout inside the repository: the load itself was not cancelled.
-        ayahRepository.failureToThrow = CancellationException("timed out")
+        dailyQuoteRepository.failureToThrow = CancellationException("timed out")
 
         val viewModel = fixture.createViewModel()
         advanceUntilIdle()
@@ -87,14 +108,14 @@ class DailyQuoteViewModelTest {
     }
 
     @Test
-    fun retryAfterErrorShowsLoadingThenAyah() = runTest {
-        ayahRepository.failureToThrow = IOException("asset missing")
+    fun retryAfterErrorShowsLoadingThenQuote() = runTest {
+        dailyQuoteRepository.failureToThrow = IOException("asset missing")
         val viewModel = fixture.createViewModel()
         advanceUntilIdle()
         assertEquals(DailyQuoteUiState.Error, viewModel.uiState.value)
 
-        ayahRepository.failureToThrow = null
-        ayahRepository.dailyAyah = ayah
+        dailyQuoteRepository.failureToThrow = null
+        dailyQuoteRepository.dailyQuote = quote
         val responseGate = fixture.holdRepositoryResponse()
         viewModel.loadDailyQuote()
 
@@ -103,24 +124,24 @@ class DailyQuoteViewModelTest {
         responseGate.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
     }
 
     @Test
     fun newerLoadWinsOverOlderSuspendedLoad() = runTest {
-        ayahRepository.dailyAyah = otherAyah
+        dailyQuoteRepository.dailyQuote = otherQuote
         val olderResponseGate = fixture.holdRepositoryResponse()
         val viewModel = fixture.createViewModel()
 
-        ayahRepository.responseGate = null
-        ayahRepository.dailyAyah = ayah
+        dailyQuoteRepository.responseGate = null
+        dailyQuoteRepository.dailyQuote = quote
         viewModel.loadDailyQuote()
         advanceUntilIdle()
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
 
         olderResponseGate.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
     }
 }

@@ -21,11 +21,14 @@ There are two ways:
 ## After installing
 
 - Find **Al Quran Quotes** in your list of apps and tap it.
-- The app opens straight to the ayah of the day. There is no sign-up and no account.
+- The app opens on the **Home** tab, with the quote of the day. There is no sign-up and no account.
+- Use the bar at the bottom to move between **Home**, **Quotes**, and **Settings**. See the [User Guide](User-Guide.md).
 - You do not need internet, not even the first time.
 
 ## Removing the app
 
-You can uninstall the app like any other Android app. Nothing else needs to be cleaned up, because the app keeps no personal data.
+You can uninstall the app like any other Android app. Nothing else needs to be cleaned up.
+
+Uninstalling removes the quotes you added, and your changes to the ayahs that come with the app, from this phone. If your phone's Android backup is on, they may come back when you install the app again from a restored backup. See [Privacy and offline use](User-Privacy-And-Offline.md).
 
 [Back to the User Guide](User-Guide.md)

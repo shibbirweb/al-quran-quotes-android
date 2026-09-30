@@ -1,6 +1,6 @@
 # Reading Comfort
 
-The app follows your phone's settings, so it can be comfortable for your eyes and your needs. There are no settings inside the app yet.
+The app follows your phone's settings, so it can be comfortable for your eyes and your needs. You cannot change these settings inside the app yet. The **Settings** tab shows that theme and text size follow your phone. See [Settings](User-Settings.md).
 
 ## Dark mode and light mode
 
@@ -29,6 +29,7 @@ flowchart TD
 - The app follows your phone's **font size** setting.
 - The Arabic text gets more space between lines as the text grows, so it stays easy to read.
 - With large text, you can scroll the screen to see everything, including the **Retry** button if it appears.
+- The large title at the top of Home, Quotes, and Settings shrinks as you scroll, which leaves more room for the text.
 
 To change the font size, open your phone's **Settings** and look for **Display** or **Accessibility**, then **Font size**.
 
@@ -36,9 +37,10 @@ To change the font size, open your phone's **Settings** and look for **Display**
 
 The app works with TalkBack, the Android screen reader:
 
-- The title "Ayah of the day" is marked as a heading, so you can jump to it.
-- The Arabic text is marked as Arabic. TalkBack can read it with an Arabic voice, if one is installed on your phone.
-- While the ayah is loading, TalkBack says "Loading today's ayah".
+- The title at the top of each screen, and the card heading, "Ayah of the day" or "Quote of the day", are marked as headings, so you can jump to them.
+- In the Quotes tab, the add button is read as "Add quote", even when it has shrunk to just a **+** sign. The buttons on each card are read as "Edit quote" and "Delete quote".
+- The Arabic text of an ayah is marked as Arabic. TalkBack can read it with an Arabic voice, if one is installed on your phone.
+- While the quote is loading, TalkBack says "Loading today's quote".
 - If loading fails, TalkBack reads the error message for you, without cutting off other speech.
 
 Tip: to hear the Arabic well, install an Arabic voice in your phone's text-to-speech settings.

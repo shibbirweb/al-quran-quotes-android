@@ -7,7 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import shibbir.me.alquranquotes.data.local.AyahDao
+import shibbir.me.alquranquotes.data.local.BundledAyahSeedDao
+import shibbir.me.alquranquotes.data.local.DailyQuoteDao
+import shibbir.me.alquranquotes.data.local.MigrationOneToTwo
+import shibbir.me.alquranquotes.data.local.QuoteDao
 import shibbir.me.alquranquotes.data.local.QuranDatabase
 import javax.inject.Singleton
 
@@ -26,9 +29,20 @@ object DatabaseModule {
             QuranDatabase::class.java,
             QURAN_DATABASE_NAME,
         )
+        databaseBuilder.addMigrations(MigrationOneToTwo)
         return databaseBuilder.build()
     }
 
     @Provides
-    fun provideAyahDao(quranDatabase: QuranDatabase): AyahDao = quranDatabase.ayahDao()
+    fun provideQuoteDao(quranDatabase: QuranDatabase): QuoteDao = quranDatabase.quoteDao()
+
+    @Provides
+    fun provideBundledAyahSeedDao(quranDatabase: QuranDatabase): BundledAyahSeedDao {
+        return quranDatabase.bundledAyahSeedDao()
+    }
+
+    @Provides
+    fun provideDailyQuoteDao(quranDatabase: QuranDatabase): DailyQuoteDao {
+        return quranDatabase.dailyQuoteDao()
+    }
 }

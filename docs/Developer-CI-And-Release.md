@@ -56,7 +56,7 @@ This job runs the device tests on an API 35 emulator (`google_apis`, `x86_64`):
 
 1. Enable KVM, so the emulator runs with hardware acceleration.
 2. Restore the emulator snapshot from the cache, or create it if there is no cache hit.
-3. Boot the emulator from the snapshot and run `./gradlew createDebugCoverageReport`. That runs every instrumented test and writes the JaCoCo device coverage report.
+3. Boot the emulator from the snapshot and run `./gradlew createDebugCoverageReport -PdeviceTestCoverage`. That runs every instrumented test and writes the JaCoCo device coverage report.
 
 ## Reports and summaries
 

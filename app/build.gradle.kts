@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
     alias(libs.plugins.kover)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -25,8 +26,9 @@ android {
 
     buildTypes {
         debug {
-            // JaCoCo coverage for the instrumented tests (createDebugAndroidTestCoverageReport).
-            enableAndroidTestCoverage = true
+            // JaCoCo instruments every app class, which slows the app down, so it is only on when
+            // asked for: ./gradlew createDebugCoverageReport -PdeviceTestCoverage (CI passes it).
+            enableAndroidTestCoverage = providers.gradleProperty("deviceTestCoverage").isPresent
         }
         release {
             optimization {
@@ -53,6 +55,16 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+// QuranDatabaseSchemaHistoryTest reads app/schemas from disk. Room's copyRoomSchemas task writes
+// the schema of the compiled entities there, so it runs first, or a changed schema would reach
+// the test one build late.
+tasks.withType<Test>().configureEach {
+    dependsOn("copyRoomSchemas")
+    val roomSchemaDirectory = layout.projectDirectory.dir("schemas")
+    inputs.dir(roomSchemaDirectory).withPathSensitivity(PathSensitivity.RELATIVE)
+    systemProperty("roomSchemaDirectory", roomSchemaDirectory.asFile.absolutePath)
+}
+
 kover {
     reports {
         filters {
@@ -70,6 +82,7 @@ kover {
                     "hilt_aggregated_deps.*",
                     "dagger.hilt.internal.*",
                     "*ComposableSingletons*",
+                    "*\$\$serializer",
                 )
                 // Needs the Android framework; instrumented tests in src/androidTest cover it.
                 annotatedBy(
@@ -108,6 +121,9 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.core)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.text)
@@ -115,6 +131,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.hilt.android)
@@ -127,6 +144,7 @@ dependencies {
     testImplementation(libs.org.json)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bottom navigation tab labels -->
+    <string name="navigation_tab_home">Home</string>
+    <string name="navigation_tab_quotes">Quotes</string>
+    <string name="navigation_tab_settings">Settings</string>
+</resources>

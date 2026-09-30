@@ -12,7 +12,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import shibbir.me.alquranquotes.R
-import shibbir.me.alquranquotes.model.Ayah
+import shibbir.me.alquranquotes.model.Quote
+import shibbir.me.alquranquotes.model.QuoteOrigin
 import shibbir.me.alquranquotes.ui.theme.AlQuranQuotesTheme
 
 private const val FIRST_EPOCH_DAY = 100L
@@ -28,62 +29,61 @@ class DailyQuoteRouteTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val ayahRepository = FakeAyahRepository()
+    private val dailyQuoteRepository = FakeDailyQuoteRepository()
 
     private val epochDayProvider = FakeEpochDayProvider(currentEpochDay = FIRST_EPOCH_DAY)
 
-    private val firstDayAyah = Ayah(
+    private val firstDayQuote = Quote.AyahQuote(
+        quoteId = 1L,
+        origin = QuoteOrigin.BUNDLED,
+        surahName = "Ash-Sharh",
         surahNumber = 94,
         ayahNumber = 5,
-        surahNameEnglish = "Ash-Sharh",
-        surahNameArabic = "sharh-ar",
         arabicText = "first-day-arabic-text",
         translation = "first-day-translation",
     )
 
-    private val secondDayAyah = Ayah(
-        surahNumber = 13,
-        ayahNumber = 28,
-        surahNameEnglish = "Ar-Ra'd",
-        surahNameArabic = "rad-ar",
-        arabicText = "second-day-arabic-text",
-        translation = "second-day-translation",
+    private val secondDayQuote = Quote.FreeTextQuote(
+        quoteId = 2L,
+        origin = QuoteOrigin.USER,
+        text = "second-day-free-text",
+        reference = "second-day-reference",
     )
 
     @Test
-    fun resumingOnANewDayShowsTheNewDaysAyah() {
-        ayahRepository.dailyAyahsByEpochDay[FIRST_EPOCH_DAY] = firstDayAyah
-        ayahRepository.dailyAyahsByEpochDay[SECOND_EPOCH_DAY] = secondDayAyah
+    fun resumingOnANewDayShowsTheNewDaysQuote() {
+        dailyQuoteRepository.dailyQuotesByEpochDay[FIRST_EPOCH_DAY] = firstDayQuote
+        dailyQuoteRepository.dailyQuotesByEpochDay[SECOND_EPOCH_DAY] = secondDayQuote
         showRoute()
-        waitUntilTextIsShown(firstDayAyah.translation)
+        waitUntilTextIsShown(firstDayQuote.translation)
 
         epochDayProvider.currentEpochDay = SECOND_EPOCH_DAY
         val activityScenario = composeTestRule.activityRule.scenario
         activityScenario.moveToState(Lifecycle.State.CREATED)
         activityScenario.moveToState(Lifecycle.State.RESUMED)
 
-        waitUntilTextIsShown(secondDayAyah.translation)
-        composeTestRule.onNodeWithText(secondDayAyah.translation).assertIsDisplayed()
+        waitUntilTextIsShown(secondDayQuote.text)
+        composeTestRule.onNodeWithText(secondDayQuote.text).assertIsDisplayed()
     }
 
     @Test
-    fun retryAfterErrorShowsTheAyah() {
+    fun retryAfterErrorShowsTheQuote() {
         showRoute()
         val errorMessage = composeTestRule.activity.getString(R.string.daily_quote_error)
         waitUntilTextIsShown(errorMessage)
 
-        ayahRepository.dailyAyahsByEpochDay[FIRST_EPOCH_DAY] = firstDayAyah
+        dailyQuoteRepository.dailyQuotesByEpochDay[FIRST_EPOCH_DAY] = firstDayQuote
         val retryLabel = composeTestRule.activity.getString(R.string.daily_quote_retry)
         composeTestRule.onNodeWithText(retryLabel).performClick()
 
-        waitUntilTextIsShown(firstDayAyah.translation)
-        composeTestRule.onNodeWithText(firstDayAyah.translation).assertIsDisplayed()
+        waitUntilTextIsShown(firstDayQuote.translation)
+        composeTestRule.onNodeWithText(firstDayQuote.translation).assertIsDisplayed()
     }
 
     /** Builds the ViewModel by hand with fakes, so the test needs no Hilt graph. */
     private fun showRoute() {
         val viewModel = DailyQuoteViewModel(
-            ayahRepository = ayahRepository,
+            dailyQuoteRepository = dailyQuoteRepository,
             epochDayProvider = epochDayProvider,
             dayChangeSource = FakeDayChangeSource(),
         )

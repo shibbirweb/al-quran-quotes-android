@@ -4,19 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
-import shibbir.me.alquranquotes.feature.dailyquote.DailyQuoteRoute
 import shibbir.me.alquranquotes.feature.dailyquote.DailyQuoteScreen
 import shibbir.me.alquranquotes.feature.dailyquote.DailyQuoteUiState
-import shibbir.me.alquranquotes.feature.dailyquote.dailyQuotePreviewAyah
+import shibbir.me.alquranquotes.feature.dailyquote.dailyQuotePreviewQuote
+import shibbir.me.alquranquotes.navigation.QuranQuotesAppScaffold
+import shibbir.me.alquranquotes.navigation.QuranQuotesAppShell
+import shibbir.me.alquranquotes.navigation.TopLevelTab
 import shibbir.me.alquranquotes.ui.theme.AlQuranQuotesTheme
 
 @AndroidEntryPoint
@@ -26,31 +22,26 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AlQuranQuotesTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    // Also keeps text clear of display cutouts, for example in landscape.
-                    contentWindowInsets = WindowInsets.safeDrawing,
-                ) { innerPadding ->
-                    DailyQuoteRoute(modifier = Modifier.padding(innerPadding))
-                }
+                QuranQuotesAppShell()
             }
         }
     }
 }
 
-// Previews cannot create Hilt ViewModels, so this shows the stateless screen with a sample ayah.
+// Previews cannot create Hilt ViewModels, so this shows the app frame on the Home tab with the
+// stateless daily quote screen and a sample ayah.
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun MainActivityPreview() {
     AlQuranQuotesTheme {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            contentWindowInsets = WindowInsets.safeDrawing,
-        ) { innerPadding ->
+        QuranQuotesAppScaffold(
+            selectedTab = TopLevelTab.HOME,
+            onTabSelected = {},
+        ) { contentModifier ->
             DailyQuoteScreen(
-                uiState = DailyQuoteUiState.Success(dailyQuotePreviewAyah),
+                uiState = DailyQuoteUiState.Success(dailyQuotePreviewQuote()),
                 onRetry = {},
-                modifier = Modifier.padding(innerPadding),
+                modifier = contentModifier,
             )
         }
     }

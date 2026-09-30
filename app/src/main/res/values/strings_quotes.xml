@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quotes_title">Quotes</string>
+    <string name="quotes_add">Add quote</string>
+    <string name="quotes_loading">Loading quotes</string>
+    <string name="quotes_edit">Edit quote</string>
+    <string name="quotes_delete">Delete quote</string>
+    <string name="quotes_delete_dialog_title">Delete this quote?</string>
+    <string name="quotes_delete_dialog_message">It will be removed. This cannot be undone.</string>
+    <string name="quotes_delete_confirm">Delete</string>
+    <string name="quotes_delete_cancel">Cancel</string>
+    <!-- Surah name, surah number, ayah number, e.g. "Ash-Sharh 94:5" -->
+    <string name="quotes_ayah_reference">%1$s %2$d:%3$d</string>
+    <string name="quotes_kind_bundled_ayah">Bundled ayah</string>
+    <string name="quotes_kind_edited_bundled_ayah">Bundled ayah, edited</string>
+    <string name="quotes_kind_bundled_free_text">Bundled quote</string>
+    <string name="quotes_kind_edited_bundled_free_text">Bundled quote, edited</string>
+    <string name="quotes_kind_user_ayah">My ayah</string>
+    <string name="quotes_kind_user_free_text">My quote</string>
+    <string name="quote_editor_add_title">Add quote</string>
+    <string name="quote_editor_edit_title">Edit quote</string>
+    <string name="quote_editor_back">Back</string>
+    <string name="quote_editor_save">Save</string>
+    <string name="quote_editor_loading">Loading the quote</string>
+    <string name="quote_editor_unavailable">This quote could not be opened.</string>
+    <string name="quote_editor_save_failed">Could not save the quote. Please try again.</string>
+    <string name="quote_editor_kind_ayah">Ayah</string>
+    <string name="quote_editor_kind_free_text">Free text</string>
+    <string name="quote_editor_surah_name">Surah name</string>
+    <string name="quote_editor_surah_number">Surah number</string>
+    <string name="quote_editor_ayah_number">Ayah number</string>
+    <string name="quote_editor_arabic_text">Arabic text</string>
+    <string name="quote_editor_translation">Translation</string>
+    <string name="quote_editor_free_text">Text</string>
+    <string name="quote_editor_reference">Reference (optional)</string>
+    <string name="quote_editor_error_required">Required</string>
+    <string name="quote_editor_error_not_a_number">Enter a whole number</string>
+    <string name="quote_editor_error_surah_out_of_range">Enter a number from 1 to 114</string>
+    <string name="quote_editor_error_ayah_number_too_small">Enter 1 or more</string>
+</resources>
