@@ -2,8 +2,11 @@
 <resources>
     <string name="app_name">Al Quran Quotes</string>
     <string name="daily_quote_title">Ayah of the day</string>
-    <string name="daily_quote_loading">Loading today\'s ayah</string>
-    <string name="daily_quote_error">Could not load today\'s ayah.</string>
+    <string name="daily_quote_free_text_title">Quote of the day</string>
+    <string name="daily_quote_user_quote_label">Your quote</string>
+    <string name="daily_quote_edited_label">Edited</string>
+    <string name="daily_quote_loading">Loading today\'s quote</string>
+    <string name="daily_quote_error">Could not load today\'s quote.</string>
     <string name="daily_quote_retry">Retry</string>
     <!-- Surah name, surah number, ayah number, e.g. "Ash-Sharh 94:5" -->
     <string name="ayah_reference">%1$s %2$d:%3$d</string>

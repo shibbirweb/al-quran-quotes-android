@@ -10,7 +10,7 @@ import org.junit.Test
 import shibbir.me.alquranquotes.testing.MainDispatcherRule
 
 /**
- * Moving to the new day's ayah, either on resume through
+ * Moving to the new day's quote, either on resume through
  * [DailyQuoteViewModel.refreshIfDayChanged] or on a day change event.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -21,27 +21,27 @@ class DailyQuoteViewModelDayChangeTest {
 
     private val fixture = DailyQuoteViewModelTestFixture()
 
-    private val ayahRepository = fixture.ayahRepository
+    private val dailyQuoteRepository = fixture.dailyQuoteRepository
 
     private val epochDayProvider = fixture.epochDayProvider
 
     private val dayChangeSource = fixture.dayChangeSource
 
-    private val ayah = fixture.ayah
+    private val quote = fixture.quote
 
-    private val otherAyah = fixture.otherAyah
+    private val otherQuote = fixture.otherQuote
 
     @Test
     fun refreshIfDayChangedReloadsWhenTheDayChanges() = runTest {
         val viewModel = createLoadedViewModel(epochDay = 100L)
 
         epochDayProvider.currentEpochDay = 101L
-        ayahRepository.dailyAyah = otherAyah
+        dailyQuoteRepository.dailyQuote = otherQuote
         viewModel.refreshIfDayChanged()
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(otherAyah), viewModel.uiState.value)
-        assertEquals(listOf(100L, 101L), ayahRepository.requestedEpochDays)
+        assertEquals(DailyQuoteUiState.Success(otherQuote), viewModel.uiState.value)
+        assertEquals(listOf(100L, 101L), dailyQuoteRepository.requestedEpochDays)
     }
 
     @Test
@@ -49,17 +49,17 @@ class DailyQuoteViewModelDayChangeTest {
         val viewModel = createLoadedViewModel(epochDay = 100L)
 
         epochDayProvider.currentEpochDay = 101L
-        ayahRepository.dailyAyah = otherAyah
+        dailyQuoteRepository.dailyQuote = otherQuote
         val responseGate = fixture.holdRepositoryResponse()
         viewModel.refreshIfDayChanged()
 
-        assertEquals(listOf(100L, 101L), ayahRepository.requestedEpochDays)
+        assertEquals(listOf(100L, 101L), dailyQuoteRepository.requestedEpochDays)
         assertEquals(DailyQuoteUiState.Loading, viewModel.uiState.value)
 
         responseGate.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(otherAyah), viewModel.uiState.value)
+        assertEquals(DailyQuoteUiState.Success(otherQuote), viewModel.uiState.value)
     }
 
     @Test
@@ -69,8 +69,8 @@ class DailyQuoteViewModelDayChangeTest {
         viewModel.refreshIfDayChanged()
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
-        assertEquals(listOf(100L), ayahRepository.requestedEpochDays)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
+        assertEquals(listOf(100L), dailyQuoteRepository.requestedEpochDays)
     }
 
     @Test
@@ -83,7 +83,7 @@ class DailyQuoteViewModelDayChangeTest {
         viewModel.refreshIfDayChanged()
         advanceUntilIdle()
 
-        assertEquals(listOf(100L, 101L), ayahRepository.requestedEpochDays)
+        assertEquals(listOf(100L, 101L), dailyQuoteRepository.requestedEpochDays)
     }
 
     @Test
@@ -91,12 +91,12 @@ class DailyQuoteViewModelDayChangeTest {
         val viewModel = createLoadedViewModel(epochDay = 100L)
 
         epochDayProvider.currentEpochDay = 101L
-        ayahRepository.dailyAyah = otherAyah
+        dailyQuoteRepository.dailyQuote = otherQuote
         dayChangeSource.emitDayChange()
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(otherAyah), viewModel.uiState.value)
-        assertEquals(listOf(100L, 101L), ayahRepository.requestedEpochDays)
+        assertEquals(DailyQuoteUiState.Success(otherQuote), viewModel.uiState.value)
+        assertEquals(listOf(100L, 101L), dailyQuoteRepository.requestedEpochDays)
     }
 
     @Test
@@ -106,14 +106,14 @@ class DailyQuoteViewModelDayChangeTest {
         dayChangeSource.emitDayChange()
         advanceUntilIdle()
 
-        assertEquals(DailyQuoteUiState.Success(ayah), viewModel.uiState.value)
-        assertEquals(listOf(100L), ayahRepository.requestedEpochDays)
+        assertEquals(DailyQuoteUiState.Success(quote), viewModel.uiState.value)
+        assertEquals(listOf(100L), dailyQuoteRepository.requestedEpochDays)
     }
 
-    /** Creates a view model that has finished loading the fixture's ayah for [epochDay]. */
+    /** Creates a view model that has finished loading the fixture's quote for [epochDay]. */
     private fun TestScope.createLoadedViewModel(epochDay: Long): DailyQuoteViewModel {
         epochDayProvider.currentEpochDay = epochDay
-        ayahRepository.dailyAyah = ayah
+        dailyQuoteRepository.dailyQuote = quote
         val viewModel = fixture.createViewModel()
         advanceUntilIdle()
         return viewModel

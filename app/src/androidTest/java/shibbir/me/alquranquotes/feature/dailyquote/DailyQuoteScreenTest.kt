@@ -6,23 +6,23 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.text.intl.LocaleList
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import shibbir.me.alquranquotes.R
-import shibbir.me.alquranquotes.model.Ayah
-import shibbir.me.alquranquotes.ui.theme.AlQuranQuotesTheme
+import shibbir.me.alquranquotes.model.Quote
+import shibbir.me.alquranquotes.model.QuoteOrigin
 
+/** The screen's app bar, loading, and error states. Quotes are in [DailyQuoteScreenQuoteTest]. */
 @RunWith(AndroidJUnit4::class)
 class DailyQuoteScreenTest {
 
@@ -35,63 +35,24 @@ class DailyQuoteScreenTest {
 
     private val errorMessage = targetContext.getString(R.string.daily_quote_error)
 
-    private val ayah = Ayah(
-        surahNumber = 94,
-        ayahNumber = 5,
-        surahNameEnglish = "Ash-Sharh",
-        surahNameArabic = "sharh-ar",
-        arabicText = "arabic-text",
-        translation = "translation-text",
-    )
+    @Test
+    fun topAppBarShowsTheAppNameAsAHeading() {
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Loading)
+
+        val appName = targetContext.getString(R.string.app_name)
+        composeTestRule.onNode(hasText(appName) and isHeading()).assertExists()
+    }
 
     @Test
     fun loadingStateShowsDescribedProgressIndicator() {
-        setScreen(DailyQuoteUiState.Loading)
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Loading)
 
         composeTestRule.onNodeWithContentDescription(loadingDescription).assertExists()
     }
 
     @Test
-    fun successStateShowsTitleAyahTextTranslationAndReference() {
-        setScreen(DailyQuoteUiState.Success(ayah))
-
-        val title = targetContext.getString(R.string.daily_quote_title)
-        val reference = targetContext.getString(
-            R.string.ayah_reference,
-            ayah.surahNameEnglish,
-            ayah.surahNumber,
-            ayah.ayahNumber,
-        )
-        composeTestRule.onNodeWithText(title).assertExists()
-        composeTestRule.onNodeWithText(ayah.arabicText).assertExists()
-        composeTestRule.onNodeWithText(ayah.translation).assertExists()
-        composeTestRule.onNodeWithText(reference).assertExists()
-        composeTestRule.onNodeWithContentDescription(loadingDescription).assertDoesNotExist()
-    }
-
-    @Test
-    fun successStateMarksTitleAsHeading() {
-        setScreen(DailyQuoteUiState.Success(ayah))
-
-        val title = targetContext.getString(R.string.daily_quote_title)
-        composeTestRule.onNodeWithText(title).assert(isHeading())
-    }
-
-    @Test
-    fun successStateMarksArabicTextAsArabicForAccessibility() {
-        setScreen(DailyQuoteUiState.Success(ayah))
-
-        val arabicNode = composeTestRule.onNodeWithText(ayah.arabicText).fetchSemanticsNode()
-        val arabicTexts = arabicNode.config[SemanticsProperties.Text]
-        val spanStyles = arabicTexts.flatMap { arabicText -> arabicText.spanStyles }
-        val spanLocales = spanStyles.map { spanStyleRange -> spanStyleRange.item.localeList }
-
-        assertTrue(LocaleList(ARABIC_LANGUAGE_TAG) in spanLocales)
-    }
-
-    @Test
     fun errorStateShowsErrorMessage() {
-        setScreen(DailyQuoteUiState.Error)
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Error)
 
         composeTestRule.onNodeWithText(errorMessage).assertExists()
         composeTestRule.onNodeWithContentDescription(loadingDescription).assertDoesNotExist()
@@ -99,7 +60,7 @@ class DailyQuoteScreenTest {
 
     @Test
     fun errorStateAnnouncesErrorMessagePolitely() {
-        setScreen(DailyQuoteUiState.Error)
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Error)
 
         val isPoliteLiveRegion = SemanticsMatcher.expectValue(
             SemanticsProperties.LiveRegion,
@@ -110,7 +71,14 @@ class DailyQuoteScreenTest {
 
     @Test
     fun errorStateScrollsSoRetryStaysReachableAtLargeFontSizes() {
-        setScreen(DailyQuoteUiState.Error)
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Error)
+
+        composeTestRule.onNode(hasScrollAction()).assertExists()
+    }
+
+    @Test
+    fun quoteScrollsSoTheTopAppBarCanCollapse() {
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Success(sampleQuote()))
 
         composeTestRule.onNode(hasScrollAction()).assertExists()
     }
@@ -118,7 +86,7 @@ class DailyQuoteScreenTest {
     @Test
     fun errorStateRetryButtonCallsOnRetry() {
         var retryCount = 0
-        setScreen(DailyQuoteUiState.Error, onRetry = { retryCount++ })
+        composeTestRule.setDailyQuoteScreen(DailyQuoteUiState.Error, onRetry = { retryCount++ })
 
         val retryLabel = targetContext.getString(R.string.daily_quote_retry)
         composeTestRule.onNodeWithText(retryLabel).performClick()
@@ -126,17 +94,11 @@ class DailyQuoteScreenTest {
         assertEquals(1, retryCount)
     }
 
-    private fun setScreen(
-        uiState: DailyQuoteUiState,
-        onRetry: () -> Unit = {},
-    ) {
-        composeTestRule.setContent {
-            AlQuranQuotesTheme {
-                DailyQuoteScreen(
-                    uiState = uiState,
-                    onRetry = onRetry,
-                )
-            }
-        }
-    }
+    /** Placeholder text only, so tests never repeat Quran text. */
+    private fun sampleQuote() = Quote.FreeTextQuote(
+        quoteId = 1L,
+        origin = QuoteOrigin.USER,
+        text = "free-text",
+        reference = "reference",
+    )
 }

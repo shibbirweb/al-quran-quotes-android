@@ -2,9 +2,9 @@
 <!--
    Auto Backup rules for Android 11 (API 30) and lower.
    See https://developer.android.com/guide/topics/data/autobackup
-   The Room database only holds bundled ayahs that are re-seeded from assets,
-   so it is excluded from backup.
+   Everything is backed up, including the Room database, because it holds the quotes the user
+   added and the bundled ayahs they edited or deleted. A restored database may carry an older
+   bundled ayah seed; the seed version check merges the current seed on the next start without
+   undoing any of the user's changes.
 -->
-<full-backup-content>
-    <exclude domain="database" path="." />
-</full-backup-content>
+<full-backup-content />

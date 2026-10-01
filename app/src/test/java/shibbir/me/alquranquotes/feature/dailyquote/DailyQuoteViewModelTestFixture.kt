@@ -1,34 +1,61 @@
 package shibbir.me.alquranquotes.feature.dailyquote
 
 import kotlinx.coroutines.CompletableDeferred
-import shibbir.me.alquranquotes.model.Ayah
-import shibbir.me.alquranquotes.testing.FakeAyahRepository
+import shibbir.me.alquranquotes.model.Quote
+import shibbir.me.alquranquotes.model.QuoteOrigin
+import shibbir.me.alquranquotes.testing.FakeDailyQuoteRepository
 import shibbir.me.alquranquotes.testing.FakeDayChangeSource
 import shibbir.me.alquranquotes.testing.FakeEpochDayProvider
-import shibbir.me.alquranquotes.testing.ashSharhSampleAyah
 
-/** Fakes, sample ayahs, and builders shared by the [DailyQuoteViewModel] test classes. */
+/** Fakes, sample quotes, and builders shared by the [DailyQuoteViewModel] test classes. */
 class DailyQuoteViewModelTestFixture {
 
-    val ayahRepository = FakeAyahRepository()
+    val dailyQuoteRepository = FakeDailyQuoteRepository()
 
     val epochDayProvider = FakeEpochDayProvider()
 
     val dayChangeSource = FakeDayChangeSource()
 
-    val ayah = ashSharhSampleAyah()
+    // Placeholder text only, so tests never repeat Quran text.
+    val quote = Quote.AyahQuote(
+        quoteId = 1L,
+        origin = QuoteOrigin.BUNDLED,
+        surahName = "Ash-Sharh",
+        surahNumber = 94,
+        ayahNumber = 5,
+        arabicText = "arabic-text",
+        translation = "translation-text",
+    )
 
-    val otherAyah = Ayah(
+    val otherQuote = Quote.AyahQuote(
+        quoteId = 2L,
+        origin = QuoteOrigin.BUNDLED,
+        surahName = "Ar-Ra'd",
         surahNumber = 13,
         ayahNumber = 28,
-        surahNameEnglish = "Ar-Ra'd",
-        surahNameArabic = "rad-ar",
         arabicText = "other-arabic-text",
         translation = "other-translation",
     )
 
+    val userAyahQuote = Quote.AyahQuote(
+        quoteId = 3L,
+        origin = QuoteOrigin.USER,
+        surahName = "user-surah-name",
+        surahNumber = 2,
+        ayahNumber = 153,
+        arabicText = "user-arabic-text",
+        translation = "user-translation",
+    )
+
+    val userFreeTextQuote = Quote.FreeTextQuote(
+        quoteId = 4L,
+        origin = QuoteOrigin.USER,
+        text = "user-free-text",
+        reference = "user-reference",
+    )
+
     fun createViewModel() = DailyQuoteViewModel(
-        ayahRepository = ayahRepository,
+        dailyQuoteRepository = dailyQuoteRepository,
         epochDayProvider = epochDayProvider,
         dayChangeSource = dayChangeSource,
     )
@@ -36,7 +63,7 @@ class DailyQuoteViewModelTestFixture {
     /** Makes the fake repository suspend until the returned gate is completed. */
     fun holdRepositoryResponse(): CompletableDeferred<Unit> {
         val responseGate = CompletableDeferred<Unit>()
-        ayahRepository.responseGate = responseGate
+        dailyQuoteRepository.responseGate = responseGate
         return responseGate
     }
 }

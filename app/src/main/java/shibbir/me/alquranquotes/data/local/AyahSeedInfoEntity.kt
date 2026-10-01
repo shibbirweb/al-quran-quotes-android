@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Records which version of the bundled ayah seed is currently stored in the `ayahs` table. The
+ * Records which version of the bundled ayah seed was last merged into the `quotes` table. The
  * table only ever holds one row, with id [SINGLE_ROW_ID].
  */
 @Entity(tableName = "ayah_seed_info")

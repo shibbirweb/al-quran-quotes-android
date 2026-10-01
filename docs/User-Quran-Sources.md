@@ -12,6 +12,10 @@ We take great care with the words of the Quran. This page explains where the tex
 - Translation: **Saheeh International**.
 - The translation is also used exactly as published, without changes.
 
+## If you edit a bundled ayah
+
+You can edit or delete the ayahs that come with the app. Your change is only in your copy of the app, and an edited ayah is marked as edited. See [Your quotes](User-Quotes.md).
+
 ## How we got the text
 
 Both the Arabic text and the English translation were retrieved through [alquran.cloud](https://alquran.cloud). They are then stored inside the app, so you do not need internet to read them.

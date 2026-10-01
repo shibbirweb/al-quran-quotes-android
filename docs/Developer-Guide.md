@@ -1,6 +1,6 @@
 # Developer Guide
 
-Welcome to the developer guide for Al Quran Quotes. The app shows one ayah from the Quran each day, with the Arabic text, an English translation, and the surah and ayah reference. It works fully offline and is kept small.
+Welcome to the developer guide for Al Quran Quotes. The Home tab shows one quote each day: an ayah from the Quran (Arabic text, English translation, and the surah and ayah reference), or one of the quotes the user added. The Quotes tab lists every quote and lets the user add quotes and edit or delete any quote, including the bundled ayahs. It works fully offline and is kept small.
 
 This guide is for developers who are new to the project. It explains the big picture and the reasons behind the main decisions. The code itself is the reference for the details, so each page points you to the files to read next.
 
@@ -14,9 +14,11 @@ This guide is for developers who are new to the project. It explains the big pic
 
 - [Setup](Developer-Setup.md): install the tools, open the project, and build, run, and test the app.
 - [Project Structure](Developer-Project-Structure.md): the packages, what lives in each one, and the three source sets.
-- [Architecture](Developer-Architecture.md): the MVVM layers, the Hilt modules, and how an ayah travels from the asset to the screen.
-- [Ayah Data](Developer-Ayah-Data.md): the bundled `ayahs.json`, its version, seeding rules, and how to update the data safely.
-- [Daily Ayah Logic](Developer-Daily-Ayah-Logic.md): how "today" is computed, how the daily ayah is chosen, and how the screen moves to a new day.
+- [Architecture](Developer-Architecture.md): the MVVM layers, the Hilt modules, the destinations, how a quote travels from the database to the screen, and the native Material 3 UI.
+- [Navigation](Developer-Navigation.md): the type-safe routes, the bottom tabs, tab navigation options, when the bottom bar shows, the top app bars, window insets, and screen transitions.
+- [Ayah Data](Developer-Ayah-Data.md): the bundled `ayahs.json`, the single `quotes` table, the seed merge rules, the version 2 schema and its hand-written migration, and backups.
+- [Daily Ayah Logic](Developer-Daily-Ayah-Logic.md): how "today" is computed, how the daily quote is chosen from every quote in one order, and how the screen moves to a new day.
+- [Quotes and Editor](Developer-Quotes-And-Editor.md): the Quotes list, origin labels, the delete confirmation, the add and edit screen, the update rules, and the validation rules.
 - [Testing and Coverage](Developer-Testing-And-Coverage.md): the TDD rule, test types per layer, fakes, and the unit and device coverage reports.
 - [CI and Release](Developer-CI-And-Release.md): the GitHub Actions jobs, reports, wiki publishing, and the R8 release build.
 - [Contributing](Developer-Contributing.md): branches, commits, and the checklist every feature or fix must pass.
@@ -25,11 +27,12 @@ This guide is for developers who are new to the project. It explains the big pic
 
 If you only have ten minutes, read these files in order:
 
-1. `app/src/main/java/shibbir/me/alquranquotes/MainActivity.kt`: the only activity. It shows the daily quote screen.
-2. `app/src/main/java/shibbir/me/alquranquotes/feature/dailyquote/DailyQuoteScreen.kt`: the route and the stateless screen.
-3. `app/src/main/java/shibbir/me/alquranquotes/feature/dailyquote/DailyQuoteViewModel.kt`: loads the ayah and reacts to day changes.
-4. `app/src/main/java/shibbir/me/alquranquotes/data/repository/OfflineAyahRepository.kt`: seeds Room from the asset and reads the daily ayah.
-5. `app/src/main/java/shibbir/me/alquranquotes/data/local/AyahDao.kt`: the Room queries.
+1. `app/src/main/java/shibbir/me/alquranquotes/MainActivity.kt`: the only activity. It shows `QuranQuotesAppShell`.
+2. `app/src/main/java/shibbir/me/alquranquotes/navigation/AppNavHost.kt`: every destination and the screen it shows.
+3. `app/src/main/java/shibbir/me/alquranquotes/feature/dailyquote/DailyQuoteViewModel.kt`: loads the daily quote and reacts to day changes.
+4. `app/src/main/java/shibbir/me/alquranquotes/feature/quoteeditor/QuoteEditorViewModel.kt`: adds a quote, or edits any quote.
+5. `app/src/main/java/shibbir/me/alquranquotes/data/seed/BundledAyahSeeder.kt` and `data/local/BundledAyahSeedDao.kt`: merge the bundled ayahs into Room without undoing the user's changes.
+6. `app/src/main/java/shibbir/me/alquranquotes/data/local/DailyQuoteDao.kt`: the daily lookup over the `quotes` table.
 
 ## About these pages
 

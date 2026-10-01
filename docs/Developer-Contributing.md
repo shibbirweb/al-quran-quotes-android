@@ -19,7 +19,7 @@ This flowchart shows the path of a change from a new branch to `main` and the wi
 flowchart TD
     Agree["agree the change with the project owner"]
     Branch["cut feature/name or fix/name from an up-to-date main"]
-    Work["tests first, code, docs, tracker"]
+    Work["red, green, refactor cycles, docs, tracker"]
     Commit["commit and push when told to"]
     PullRequest["open a pull request"]
     Checks{"Tests workflow green?"}
@@ -56,6 +56,10 @@ git switch -c feature/favorites
 - **No co-author lines.** Never add `Co-Authored-By` or any other co-author or attribution trailer.
 - **No em dash** anywhere: code, comments, strings, docs, or commit messages. Use a comma, colon, parentheses, or a plain hyphen.
 
+## The database is at version 2
+
+`QuranDatabase` moved to version 2 when every quote moved into the one `quotes` table, with the hand-written `MigrationOneToTwo`. If you installed an old pre-release build with a different schema, clear its storage once before testing (see [Setup](Developer-Setup.md)). The database holds user data (added quotes and edited or deleted bundled ayahs), so a schema change always needs a version bump and a tested migration (usually a Room `@AutoMigration`), never an uninstall or a destructive fallback. `QuranDatabaseSchemaHistoryTest` fails when the bump is missing. See [Ayah Data](Developer-Ayah-Data.md).
+
 ## Code style in short
 
 `CLAUDE.md` has the full rules. The ones people miss most often:
@@ -72,16 +76,17 @@ Work through this list on your branch before you ask for a review.
 
 1. **Agreed first.** The feature or fix was agreed with the project owner.
 2. **Tracker updated at the start.** For a feature, move it to In progress in the `README.md` feature tracker when the branch starts.
-3. **Tests first.** Write a failing test, make it pass, then refactor. Cover every layer the change touches. See [Testing and Coverage](Developer-Testing-And-Coverage.md).
+3. **Real TDD.** Work in red, green, refactor cycles: write one small test and see it fail for the expected reason, write the minimum code and see it pass, then refactor. Cover every layer the change touches. When several agents work in parallel, each works in its own copy of the project and only its own files are copied back. See [Testing and Coverage](Developer-Testing-And-Coverage.md).
 4. **Coverage is 100%.** `./gradlew koverVerifyDebug` passes. Do not add a Kover exclusion to get there. A new Android-bound class may be excluded only if a device test covers it, and it must be listed in `CLAUDE.md`.
-5. **Device tests pass.** `./gradlew connectedDebugAndroidTest` (or `createDebugCoverageReport`) is green on a device or emulator.
+5. **Device tests pass.** They compile locally (`./gradlew assembleDebugAndroidTest`) and are green in CI. If you have a device or emulator, also run `./gradlew connectedDebugAndroidTest` (or `createDebugCoverageReport -PdeviceTestCoverage`).
 6. **Lint passes.** `./gradlew lintDebug`.
 7. **Release build works** if you added or changed a library: `./gradlew assembleRelease`.
 8. **Ayah data rules** if you touched `ayahs.json`: regenerated from source and `version` bumped. See [Ayah Data](Developer-Ayah-Data.md).
-9. **Docs pages updated.** User pages (`docs/User-*.md`) for anything a user can see or do differently. Developer pages (`docs/Developer-*.md`) for changes to architecture, data, commands, tests, coverage, CI, or rules. If neither changed, say so in the pull request description. A new page must be linked from its guide page and from `docs/_Sidebar.md`.
-10. **Tracker updated at the end.** For a feature, move it to Done in the `README.md` feature tracker in the pull request that completes it.
-11. **`CLAUDE.md` updated** when the change affects architecture, commands, dependencies, or rules.
-12. **Commit when told**, push the branch, and open a pull request. Merge once CI is green.
+9. **Schema rules** if you changed the schema (an entity, a column, or a table): the `QuranDatabase` version is bumped (even if the previous version is not merged yet), the new `app/schemas` file is committed and its `identityHash` pinned in `QuranDatabaseSchemaHistoryTest`, no older schema file changed, the migration (an `@AutoMigration` when Room can work it out) is added and tested (`QuranDatabaseMigrationTest` on a device, and a JVM test of its statements like `MigrationOneToTwoTest` for a hand-written one), and there is no destructive fallback. The database holds the user's quotes and edits.
+10. **Docs pages updated.** User pages (`docs/User-*.md`) for anything a user can see or do differently. Developer pages (`docs/Developer-*.md`) for changes to architecture, data, commands, tests, coverage, CI, or rules. If neither changed, say so in the pull request description. A new page must be linked from its guide page and from `docs/_Sidebar.md`.
+11. **Tracker updated at the end.** For a feature, move it to Done in the `README.md` feature tracker in the pull request that completes it.
+12. **`CLAUDE.md` updated** when the change affects architecture, commands, dependencies, or rules.
+13. **Commit when told**, push the branch, and open a pull request. Merge once CI is green.
 
 ## Pull requests
 

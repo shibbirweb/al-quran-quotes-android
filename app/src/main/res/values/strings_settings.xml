@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_value">Follows your phone</string>
+    <string name="settings_text_size_title">Text size</string>
+    <string name="settings_text_size_value">Follows your phone</string>
+    <string name="settings_about_title">About</string>
+    <!-- App name and installed version, e.g. "Al Quran Quotes, version 1.0" -->
+    <string name="settings_about_value">%1$s, version %2$s</string>
+    <string name="settings_coming_soon">More settings are coming soon.</string>
+</resources>

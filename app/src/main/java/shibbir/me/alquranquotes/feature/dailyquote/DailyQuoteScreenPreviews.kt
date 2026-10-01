@@ -1,44 +1,54 @@
 package shibbir.me.alquranquotes.feature.dailyquote
 
-import android.content.res.Configuration
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import shibbir.me.alquranquotes.model.Quote
+import shibbir.me.alquranquotes.model.QuoteOrigin
+import shibbir.me.alquranquotes.ui.preview.LightDarkLargeFontPreviews
 import shibbir.me.alquranquotes.ui.theme.AlQuranQuotesTheme
 
-@Preview
+// The sample quotes are built inside the previews, not in top-level values, so the coverage
+// check skips them like every other composable.
+
+@LightDarkLargeFontPreviews
 @Composable
-private fun DailyQuoteScreenSuccessPreview() {
-    DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Success(dailyQuotePreviewAyah))
+private fun DailyQuoteScreenBundledAyahPreview() {
+    val bundledAyah = dailyQuotePreviewQuote()
+    DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Success(bundledAyah))
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+/** Reuses the bundled sample's text, so no Quran text is typed here. */
+@LightDarkLargeFontPreviews
 @Composable
-private fun DailyQuoteScreenSuccessDarkPreview() {
-    DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Success(dailyQuotePreviewAyah))
+private fun DailyQuoteScreenUserAyahPreview() {
+    val userAyah = dailyQuotePreviewQuote().copy(origin = QuoteOrigin.USER)
+    DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Success(userAyah))
 }
 
-@Preview(fontScale = 2f)
+@LightDarkLargeFontPreviews
 @Composable
-private fun DailyQuoteScreenSuccessLargeFontPreview() {
-    DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Success(dailyQuotePreviewAyah))
+private fun DailyQuoteScreenUserFreeTextPreview() {
+    val userFreeText = Quote.FreeTextQuote(
+        quoteId = 2L,
+        origin = QuoteOrigin.USER,
+        text = "Write down one thing you are grateful for today.",
+        reference = "My notes",
+    )
+    DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Success(userFreeText))
 }
 
-@Preview
+@LightDarkLargeFontPreviews
 @Composable
 private fun DailyQuoteScreenErrorPreview() {
     DailyQuoteScreenPreviewContent(uiState = DailyQuoteUiState.Error)
 }
 
-/** Draws the theme's background behind the screen, which Scaffold does in the app. */
+/** The screen's own Scaffold draws the theme's background. */
 @Composable
 private fun DailyQuoteScreenPreviewContent(uiState: DailyQuoteUiState) {
     AlQuranQuotesTheme {
-        Surface {
-            DailyQuoteScreen(
-                uiState = uiState,
-                onRetry = {},
-            )
-        }
+        DailyQuoteScreen(
+            uiState = uiState,
+            onRetry = {},
+        )
     }
 }
